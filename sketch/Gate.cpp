@@ -1,0 +1,159 @@
+#include "Gate.h"
+
+Gate::Gate(
+  double pX,
+  double pY,
+  double pSize,
+  int pConnectorCount,
+  bool pVertical,
+  int pLineColor,
+  double pLineWidth,
+  double pAspectRatio,
+  double pBaseSizePerc,
+  double pConnectorSize,
+  double pWidth,
+  double pConnectorMargin
+) :
+  x(pX),
+  y(pY),
+  size(pSize),  
+  connectorCount(pConnectorCount),
+  vertical(pVertical),
+  lineColor(pLineColor),
+  lineWidth(pLineWidth),
+  aspectRatio(pAspectRatio),
+  baseSizePerc(pBaseSizePerc),
+  connectorSize(pConnectorSize),    
+  width(pWidth),
+  connectorMargin(pConnectorMargin)  
+{
+  Serial.println("no constructor ");
+
+  /*implementar metodos seters, mas manter as propriedades publicas caso o usuario queira manipulalas manualemnte, 
+  nos metodos setters, deverão ser feitas essas mesmas tratativas aqui do constructor*/
+  
+  if (pSize != DEFAULT_GATE_SIZE) {
+    if (pWidth == DEFAULT_GATE_WIDTH) {
+      width = pSize * pAspectRatio;
+      connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;      
+    } 
+    if (pConnectorSize == DEFAULT_GATE_CONNECTOR_SIZE) {
+      connectorSize = width * DEFAULT_GATE_CONNECTOR_SIZE_PERC;      
+    }
+  }
+  if (pAspectRatio != DEFAULT_GATE_ASPECT_RATIO) {
+    if (pBaseSizePerc == DEFAULT_GATE_BASE_SIZE_PERC) {
+      baseSizePerc = pSize * DEFAULT_GATE_BASE_SIZE_PERC;
+    }
+    if (pWidth == DEFAULT_GATE_WIDTH) {      
+      width = pSize * pAspectRatio;
+      connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;
+    }
+  }
+  Serial.println("no fim constructor");
+};
+
+Gate::~Gate() {
+  // Limpeza, se necessária
+};
+
+void Gate::updateWidthDependencies(){
+  connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;
+}
+
+void Gate::updateSizeDependencies(){
+  setWidth(size * aspectRatio);
+  connectorSize = size * DEFAULT_GATE_CONNECTOR_SIZE_PERC;
+}
+
+void Gate::updateAspectRatioDependencies(){
+  setWidth(size * aspectRatio);
+}
+
+
+
+void Gate::setWidth(double pWidth) {
+  width = pWidth;
+  updateWidthDependencies();
+}
+void Gate::setAspectRatio(double pAspectRatio) {
+  aspectRatio = pAspectRatio;
+  updateAspectRatioDependencies();
+}
+
+void Gate::setSize(double pSize) {
+  size = pSize;
+  updateSizeDependencies();
+}
+
+
+void Gate::drawConnector(int position, double startPos, double pConnectorSize) { 
+  Serial.println("Gate::drawConnector "+String(position) + ","+String(startPos) + ","+String(pConnectorSize));
+  double connMargin = connectorMargin;
+  if (pConnectorSize == -1) {
+    pConnectorSize = connectorSize;
+  }
+  if (position > 0) {            
+    connMargin = connMargin + (position * (width - (connMargin * 2)) / (connectorCount - 1));    
+  } 
+  if (lineWidth > 1) {
+    connMargin = connMargin - lineWidth / 2;
+  }
+  if (vertical) {
+    if (startPos == -1) {
+      startPos = y;
+    }
+    if (lineWidth > 1) {
+      for (int i = 0; i < lineWidth; i++) {
+        SCtrl::tft.drawLine(x + connMargin+i,startPos,x + connMargin+i,startPos + pConnectorSize, lineColor);
+      }
+    } else {
+      SCtrl::tft.drawLine(x + connMargin,startPos,x + connMargin,startPos + pConnectorSize, lineColor);
+    }
+  } else {
+    if (startPos == -1) {
+      startPos = x;
+    }
+    if (lineWidth > 1) {
+      for (int i = 0; i < lineWidth; i++) {
+        SCtrl::tft.drawLine(startPos, y + connMargin + i,startPos - pConnectorSize,y + connMargin+i, lineColor);
+      }
+    } else {
+      SCtrl::tft.drawLine(startPos, y + connMargin,startPos - pConnectorSize,y + connMargin, lineColor);
+    }
+  }
+};
+
+void Gate::drawOutputConnector() {   
+  if (vertical) {
+    if (lineWidth > 1) {
+      double pInit = x + (width / 2 ) - (lineWidth / 2);
+      for (int i = 0; i < lineWidth; i++) {
+        SCtrl::tft.drawLine(pInit+i ,y - size - connectorSize,pInit+i,y - size , lineColor);
+      }
+    } else {
+      SCtrl::tft.drawLine(x + (width / 2 ) ,y - size - connectorSize,x + (width / 2 ),y - size , lineColor);
+    }
+  } else {
+    if (lineWidth > 1) {
+      double pInit = y + (width / 2) - (lineWidth / 2);
+      for (int i = 0; i < lineWidth; i++) {
+        SCtrl::tft.drawLine(x + size ,pInit + i,x + size + connectorSize,pInit + i, lineColor);
+      }
+    } else {
+      SCtrl::tft.drawLine(x + size ,y + (width/2),x + size + connectorSize,y + (width/2), lineColor);
+    }
+  }
+};
+
+void Gate::drawBody() {
+  //to override
+}
+
+void Gate::draw() {
+  for(int i = 0; i < connectorCount; i++) {
+    drawConnector(i);
+  }
+  drawOutputConnector();
+  drawBody();
+};
