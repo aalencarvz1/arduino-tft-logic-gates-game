@@ -57,3 +57,7 @@ DPoint calcularP3(double a, double b, double c, DPoint p1, DPoint p2) {
 double getCatetoFromPitagoras(double hip, double cat1) {
   return sqrt(abs(pow(hip,2.0) - pow(cat1,2.0)));
 }
+
+String boolToString(bool v) {
+  return v == true ? "true" : "false";
+}

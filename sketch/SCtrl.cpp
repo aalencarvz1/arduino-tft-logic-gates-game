@@ -1,6 +1,12 @@
 #include "SCtrl.h"
+#include "Utils.h"
+#include "EVRcpt.h"
+#include <math.h>
+
 
 MCUFRIEND_kbv SCtrl::tft;
+TouchScreen SCtrl::ts = TouchScreen(SCtrl::TS_XP, SCtrl::TS_YP, SCtrl::TS_XM, SCtrl::TS_YM, 300);
+
 
 void SCtrl::init(){
     // Configuração do touchscreen
@@ -13,6 +19,76 @@ void SCtrl::init(){
       tft.begin(0x9486);  // Força o uso de um controlador comum, se necessário
     }
     tft.setRotation(1);  // Ajuste a rotação conforme necessário
+};
+
+
+TextInfo SCtrl::drawCenteredText(const char* text, double y, double centerX, double textSize, int color) {
+    // Defina o tamanho da fonte
+    SCtrl::tft.setTextSize(textSize);
+    SCtrl::tft.setTextColor(color);
+
+    // Calcule a largura e altura do texto com base no tamanho da fonte
+    double textWidth = strlen(text) * 6.0 * textSize;  // Cada caractere tem aproximadamente 6px de largura na fonte padrão
+    double textHeight = 8.0 * textSize;  // A altura da fonte padrão é de aproximadamente 8px
+
+    // Calcule as coordenadas para centralizar o texto
+    double x = centerX - (textWidth / 2.0);
+    
+    // Desenhe o texto no TFT
+    SCtrl::tft.setCursor(x, y);
+    SCtrl::tft.print(text);
+
+    // Retorne as informações do texto
+    TextInfo result;
+    result.x = x;
+    result.y = y;
+    result.w = textWidth;
+    result.h = textHeight;
+    return result;
+};
+
+
+static void SCtrl::drawRoundButton(double x,double y,double r,int color,const char* text, bool hasCenterPlay, bool hasBorder, double textDistance = 20, void (*onClick)()) {
+  if (hasBorder) {
+    SCtrl::tft.drawCircle(x,y,r,color);
+    SCtrl::tft.drawCircle(x,y,r-1.0,color);
+    SCtrl::tft.fillCircle(x,y,r*0.8,color);
+  } else {
+    SCtrl::tft.fillCircle(x,y,r,color);
+  }
+
+  DPoint p1;
+  double playR = r * 0.3;
+  p1.x = (x - playR) + (r * 0.1);
+  if (hasCenterPlay) {
+    int playColor = TFT_BLACK;    
+    double arred = r * 0.05;
+
+    //define os pontos do triangulo do play
+    DPoint p2,p3;    
+    p1.y = y - playR;
+    p2.x = p1.x;
+    p2.y = y + playR;
+    p3.x = x + playR + (r * 0.1);
+    p3.y = y;
+
+    //desenha o play
+    SCtrl::tft.fillTriangle(p1.x,p1.y, p2.x,p2.y, p3.x,p3.y , playColor);
+
+    //desenha os cantos arredondados
+    SCtrl::tft.fillCircle(p1.x,p1.y,arred*2.0, color);
+    SCtrl::tft.fillCircle(p1.x+arred*0.8,p1.y+arred*1.70,arred, playColor);
+    SCtrl::tft.fillCircle(p2.x,p2.y,arred*2.0, color);
+    SCtrl::tft.fillCircle(p2.x+arred*0.8,p2.y-arred*2,arred, playColor);
+    SCtrl::tft.fillCircle(p3.x,p3.y,arred*2.0, color);
+    SCtrl::tft.fillCircle(p3.x-arred*2.3,p3.y,arred, playColor);
+  }
+  if (text != "") {
+    SCtrl::drawCenteredText(text,y+r+textDistance,x);
+  }
+  if (onClick != nullptr) {
+    new EVRcpt(x, y, r, onClick);
+  }
 };
 
 
@@ -67,21 +143,12 @@ static CircleInfo SCtrl::drawArcFromArrow(double x1, double y1, double x2, doubl
         } else /*if (y1 > y2)*/ {
           centralAngle = 180.0 + (90-a1);
         } 
-        /*centralAngle = 180+//180.0-(a1+90.0); // /-
-        
-        if (y1 < y2) {//flexa/arco para cima ou 1º quadrante (x+,y+) sent horario  \-
-          centralAngle = 360.0 - centralAngle;
-        }*/ 
       } else {//flexa do arco para esquerda
         if (y1 <= y2) {
           centralAngle = 90-a1;
         } else {
           centralAngle = 90.0 + (90-a1);
         }
-        /*centralAngle = 180.0-(a1+90.0)+180.0; // -/
-        if (y1 < y2) {//flexa/arco para cima ou 3º quadrante (x-,y+) sent horario -/
-          centralAngle = centralAngle - 90.0; // \-
-        }*/
       }
     }
   } else if (x1 > x2) {
@@ -106,6 +173,8 @@ static CircleInfo SCtrl::drawArcFromArrow(double x1, double y1, double x2, doubl
   result.r = r;
   SCtrl::drawSmoothArc(pc.x,pc.y,r,startAngle,startAngle+arcAngle,color);    
   return result;
-}
+};
+
+
 
 

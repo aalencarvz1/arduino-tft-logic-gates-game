@@ -1,16 +1,16 @@
-#ifndef ANDGATE_H
-#define ANDGATE_H
+#ifndef NOTGATE_H
+#define NOTGATE_H
 
 #include "Gate.h"
 
-struct AndGate : public Gate {
+struct NotGate : public Gate {
 
   //construtor com parametros tem que reser implementado também nas classes derivadas
-  AndGate(
+  NotGate(
     double pX                = 150.0, 
     double pY                = 250.0,
     double pSize             = DEFAULT_GATE_SIZE,
-    int pConnectorCount      = DEFAULT_GATE_CONNECTOR_COUNT,	
+    int pConnectorCount      = 1,	
     bool pVertical           = DEFAULT_GATE_VERTICAL_DIRECTION,
     int pLineColor           = DEFAULT_GATE_LINE_COLOR,
     double pLineWidth        = DEFAULT_GATE_LINE_WIDTH,
@@ -24,4 +24,4 @@ struct AndGate : public Gate {
   bool calcOutputState() override;
 };
 
-#endif //ANDGATE_H
+#endif //NOTGATE_H

@@ -1,5 +1,65 @@
 #include "Gate.h"
 
+GateInput::GateInput(
+  int pId,
+  double pX,
+  double pY,
+  double pR,
+  bool pOn,
+  Gate* pGate,
+  bool pClickable
+) :
+  id(pId),
+  x(pX),
+  y(pY),
+  r(pR),
+  on(pOn),
+  gate(pGate),
+  clickable(pClickable)
+{
+  if (pR < DEFAULT_GATE_MIN_INPUT_RADIUS) {
+    r = DEFAULT_GATE_MIN_INPUT_RADIUS;
+  } else if (pR > DEFAULT_GATE_MAX_INPUT_RADIUS) {
+    r = DEFAULT_GATE_MAX_INPUT_RADIUS;
+  };
+  initState(pOn);
+};
+
+void GateInput::initState(bool pInitState) {
+  this->on = pInitState;
+  if (clickable) {
+    if (ev != nullptr) {
+      delete ev;
+      ev = nullptr;
+    }
+    ev = new EVRcpt(x,y,r);
+    auto f = [&](){
+      this->setState(!this->on);
+    };
+    if (ev->onClickCallback != nullptr) {
+      delete ev->onClickCallback;
+      ev->onClickCallback = nullptr;
+    }
+    ev->onClickCallback = new LambdaCallback<decltype(f)>(f);  
+  }  
+}
+
+void GateInput::setState(bool newState) {
+  Serial.println("setting state of " +String(id) + " to " + boolToString(newState));
+  on = newState;  
+  if (redrawOnChange) draw();
+  if (recalcOnChange) gate->calcOutputState();
+  Serial.println("zzzzzzz "+boolToString(gate->inputs[gate->connectorCount]->on));
+  if (redrawOnChange) gate->inputs[gate->connectorCount]->draw();
+}
+
+void GateInput::draw() {
+  Serial.println("drawing input on "+String(x) + "," + String(y)+" " + boolToString(on));
+  SCtrl::drawRoundButton(x,y,r,(on == true) ? DEFAULT_GATE_INPUT_ON_COLOR : DEFAULT_GATE_INPUT_OFF_COLOR,nullptr,false,false,0);  
+};
+
+
+
 Gate::Gate(
   double pX,
   double pY,
@@ -42,19 +102,22 @@ Gate::Gate(
     }
   }
   if (pAspectRatio != DEFAULT_GATE_ASPECT_RATIO) {
-    if (pBaseSizePerc == DEFAULT_GATE_BASE_SIZE_PERC) {
+    /*if (pBaseSizePerc == DEFAULT_GATE_BASE_SIZE_PERC) {
       baseSizePerc = pSize * DEFAULT_GATE_BASE_SIZE_PERC;
-    }
+    }*/
     if (pWidth == DEFAULT_GATE_WIDTH) {      
       width = pSize * pAspectRatio;
       connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;
     }
   }
+  
   Serial.println("no fim constructor");
 };
 
+//destructor;
 Gate::~Gate() {
-  // Limpeza, se necessária
+  Serial.println("Gate::~Gate destructor");
+  freeInputs();
 };
 
 void Gate::updateWidthDependencies(){
@@ -87,6 +150,89 @@ void Gate::setSize(double pSize) {
 }
 
 
+void Gate::setValues(
+  double pX,
+  double pY,
+  double pSize,
+  int pConnectorCount,
+  bool pVertical,
+  int pLineColor,
+  double pLineWidth,
+  double pAspectRatio,
+  double pBaseSizePerc,
+  double pConnectorSize,
+  double pWidth,
+  double pConnectorMargin
+) {
+  Serial.println("no constructor ");
+
+  this->x = pX;
+  this->y = pY;
+  this->size = pSize;
+  this->connectorCount = pConnectorCount;
+  this->vertical = pVertical;
+  this->lineColor = pLineColor;
+  this->lineWidth = pLineWidth;
+  this->aspectRatio = pAspectRatio;
+  this->baseSizePerc = pBaseSizePerc;
+  this->connectorSize = pConnectorSize;
+  this->width = pWidth;
+  this->connectorMargin = pConnectorMargin;
+
+  /*implementar metodos seters, mas manter as propriedades publicas caso o usuario queira manipulalas manualemnte, 
+  nos metodos setters, deverão ser feitas essas mesmas tratativas aqui do constructor*/
+  
+  if (pSize != DEFAULT_GATE_SIZE) {
+    if (pWidth == DEFAULT_GATE_WIDTH) {
+      width = pSize * pAspectRatio;
+      connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;      
+    } 
+    if (pConnectorSize == DEFAULT_GATE_CONNECTOR_SIZE) {
+      connectorSize = width * DEFAULT_GATE_CONNECTOR_SIZE_PERC;      
+    }
+  }
+  if (pAspectRatio != DEFAULT_GATE_ASPECT_RATIO) {
+    /*if (pBaseSizePerc == DEFAULT_GATE_BASE_SIZE_PERC) {
+      baseSizePerc = pSize * DEFAULT_GATE_BASE_SIZE_PERC;
+    }*/
+    if (pWidth == DEFAULT_GATE_WIDTH) {      
+      width = pSize * pAspectRatio;
+      connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;
+    }
+  }
+  Serial.println("no fim constructor");
+};
+
+void Gate::freeInputs(){
+  if (inputs != nullptr) {
+    for (size_t i = 0; i < connectorCount; i++) {
+      delete inputs[i];  // Desaloca cada objeto GateInput
+      inputs[i] = nullptr;
+    }
+    delete[] inputs; 
+    inputs = nullptr;
+  }
+};
+
+// Método para redimensionar o array
+void Gate::setConnectorCount(byte pConnectorCount) {
+    // Libera o array antigo, se existir
+    freeInputs();
+
+    // Atualiza o tamanho do array
+    connectorCount = pConnectorCount;
+
+    // Realoca memória para o novo tamanho
+    //inputs = (GateInput*)malloc(sizeof(GateInput) * (connectorCount + 1)); //+1 = last = output connector
+     inputs = new GateInput*[connectorCount];
+
+    // Inicializa os novos GateInput no array
+    /*for (byte i = 0; i < connectorCount; ++i) {
+        inputs[i] = GateInput();  // Inicializa com id e estado falso
+    }*/
+}
+
+
 void Gate::drawConnector(int position, double startPos, double pConnectorSize) { 
   Serial.println("Gate::drawConnector "+String(position) + ","+String(startPos) + ","+String(pConnectorSize));
   double connMargin = connectorMargin;
@@ -95,10 +241,13 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
   }
   if (position > 0) {            
     connMargin = connMargin + (position * (width - (connMargin * 2)) / (connectorCount - 1));    
-  } 
+  } else if (connectorCount == 1) {
+    connMargin = width / 2;
+  }
   if (lineWidth > 1) {
     connMargin = connMargin - lineWidth / 2;
-  }
+  }  
+
   if (vertical) {
     if (startPos == -1) {
       startPos = y;
@@ -110,6 +259,23 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
     } else {
       SCtrl::tft.drawLine(x + connMargin,startPos,x + connMargin,startPos + pConnectorSize, lineColor);
     }
+    if (hasInputs == true) {
+      if (inputs == nullptr) {
+        setConnectorCount(connectorCount);
+      }
+      inputs[position] = new GateInput(
+        position,
+        x + connMargin,
+        startPos+pConnectorSize,
+        size * DEFAULT_GATE_INPUT_RADIUS_PERC,
+        false,
+        this
+      );
+      Serial.println("nnnn"+position);
+      inputs[position]->draw();
+      //inputs[position] = input;
+    }
+
   } else {
     if (startPos == -1) {
       startPos = x;
@@ -120,6 +286,23 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
       }
     } else {
       SCtrl::tft.drawLine(startPos, y + connMargin,startPos - pConnectorSize,y + connMargin, lineColor);
+    }
+
+    if (hasInputs == true) {
+      if (inputs == nullptr) {
+        setConnectorCount(connectorCount);
+      }
+      inputs[position] = new GateInput(
+        position,
+        startPos-pConnectorSize,
+        y + connMargin,
+        size * DEFAULT_GATE_INPUT_RADIUS_PERC,
+        false,
+        this
+      );
+      Serial.println("nnnn"+position);
+      inputs[position]->draw();
+      //inputs[position] = input;
     }
   }
 };
@@ -134,6 +317,23 @@ void Gate::drawOutputConnector() {
     } else {
       SCtrl::tft.drawLine(x + (width / 2 ) ,y - size - connectorSize,x + (width / 2 ),y - size , lineColor);
     }
+
+    if (hasInputs == true) {
+      if (inputs == nullptr) {
+        setConnectorCount(connectorCount);
+      }
+      inputs[connectorCount] = new GateInput(
+        connectorCount,
+        x + (width / 2 ),
+        y - size - connectorSize,
+        size * DEFAULT_GATE_INPUT_RADIUS_PERC,
+        false,
+        this,
+        false 
+      );
+      calcOutputState();
+      inputs[connectorCount]->draw();
+    }
   } else {
     if (lineWidth > 1) {
       double pInit = y + (width / 2) - (lineWidth / 2);
@@ -143,17 +343,41 @@ void Gate::drawOutputConnector() {
     } else {
       SCtrl::tft.drawLine(x + size ,y + (width/2),x + size + connectorSize,y + (width/2), lineColor);
     }
+
+    if (hasInputs == true) {
+      if (inputs == nullptr) {
+        setConnectorCount(connectorCount);
+      }
+      inputs[connectorCount] = new GateInput(
+        connectorCount,
+        x + size + connectorSize,
+        y + width / 2,
+        size * DEFAULT_GATE_INPUT_RADIUS_PERC,
+        false,
+        this,
+        false 
+      );
+      calcOutputState();
+      inputs[connectorCount]->draw();
+    }
   }
 };
 
-void Gate::drawBody() {
+void Gate::drawBody(bool drawConnectors) {
   //to override
 }
 
-void Gate::draw() {
-  for(int i = 0; i < connectorCount; i++) {
-    drawConnector(i);
+void Gate::draw(bool drawConnectors) {
+  if (drawConnectors == true) {
+    for(int i = 0; i < connectorCount; i++) {
+      drawConnector(i);
+    }
+    drawOutputConnector();
   }
-  drawOutputConnector();
-  drawBody();
+  drawBody(drawConnectors);
+};
+
+bool Gate::calcOutputState(){
+  //to override
+  return outputState;
 };

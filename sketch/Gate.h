@@ -2,6 +2,7 @@
 #define GATE_H
 
 #include "SCtrl.h"
+#include "EVRcpt.h"
 
 #define DEFAULT_GATE_SIZE 150.0
 #define DEFAULT_GATE_CONNECTOR_COUNT 2
@@ -20,6 +21,45 @@
 
 #define DEFAULT_GATE_MIN_ARC_HEIGHT_PERC 0.2
 #define DEFAULT_GATE_BASE_ARC_HEIGHT_ASPECT_RATIO 0.3
+#define DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC 0.3
+#define DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC 0.6
+
+
+
+#define DEFAULT_GATE_INPUT_OFF_COLOR TFT_RED
+#define DEFAULT_GATE_INPUT_ON_COLOR TFT_GREEN
+#define DEFAULT_GATE_INPUT_RADIUS_PERC 0.15
+#define DEFAULT_GATE_MIN_INPUT_RADIUS 10
+#define DEFAULT_GATE_MAX_INPUT_RADIUS 30
+
+
+struct Gate; //forhard
+
+struct GateInput {
+  int id;
+  double x;
+  double y;
+  double r;  
+  bool on = false;
+  EVRcpt* ev = nullptr;
+  Gate* gate = nullptr;
+  bool clickable = true;
+  bool redrawOnChange = true;
+  bool recalcOnChange = true;
+  
+  GateInput(
+    int pId,
+    double pX = 0,
+    double pY = 0,
+    double pR = DEFAULT_GATE_MIN_INPUT_RADIUS + ((DEFAULT_GATE_MAX_INPUT_RADIUS - DEFAULT_GATE_MIN_INPUT_RADIUS) / 2),
+    bool pOn = false,
+    Gate* pGate = nullptr,
+    bool pClickable = true
+  );
+  void initState(bool pInitState = false);
+  void setState(bool newState);
+  void draw();
+};
 
 
 struct Gate {
@@ -36,6 +76,14 @@ struct Gate {
   double connectorSize;
   double width;  
   double connectorMargin;
+
+  double firstConnectorX;
+  double firstConnectorY;
+
+  bool hasInputs = false;
+  GateInput** inputs = nullptr;
+
+  bool outputState = false;
 
 
   Gate(
@@ -61,11 +109,30 @@ struct Gate {
   void setWidth(double pWidth);
   void setAspectRatio(double pAspectRatio);
   void setSize(double pSize);
+  void setConnectorCount(byte pConnectorCount);
+  virtual void setValues(
+    double pX                = 150.0, 
+    double pY                = 250.0,
+    double pSize             = DEFAULT_GATE_SIZE,
+    int pConnectorCount      = DEFAULT_GATE_CONNECTOR_COUNT,	
+    bool pVertical           = DEFAULT_GATE_VERTICAL_DIRECTION,
+    int pLineColor           = DEFAULT_GATE_LINE_COLOR,
+    double pLineWidth        = DEFAULT_GATE_LINE_WIDTH,
+    double pAspectRatio      = DEFAULT_GATE_ASPECT_RATIO,
+    double pBaseSizePerc     = DEFAULT_GATE_BASE_SIZE_PERC,
+    double pConnectorSize    = DEFAULT_GATE_CONNECTOR_SIZE,
+    double pWidth            = DEFAULT_GATE_WIDTH,
+    double pConnectorMargin  = DEFAULT_GATE_CONNECTOR_MARGIN
+  );
+
+  void freeInputs();
 
   virtual void drawConnector(int position, double startPos = -1, double pConnectorSize = -1);
-  void drawOutputConnector();
-  virtual void drawBody();
-  void draw();
+  virtual void drawOutputConnector();
+  virtual void drawBody(bool drawConnectors = true);      
+  virtual void draw(bool drawConnectors = true);
+
+  virtual bool calcOutputState();
 };
 
 #endif //GATE_H

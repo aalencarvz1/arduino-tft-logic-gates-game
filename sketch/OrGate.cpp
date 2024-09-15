@@ -17,25 +17,58 @@ OrGate::OrGate(
   double pWidth,
   double pConnectorMargin
 ) :
-  Gate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin) {};
+  Gate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin) 
+{
+  if (pBaseSizePerc < DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC) {
+    baseSizePerc = DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC;
+  } else if (pBaseSizePerc > DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC) {
+    baseSizePerc = DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC;
+  }
+};
 
 
+void OrGate::setValues(
+  double pX,
+  double pY,
+  double pSize,
+  int pConnectorCount,
+  bool pVertical,
+  int pLineColor,
+  double pLineWidth,
+  double pAspectRatio,
+  double pBaseSizePerc,
+  double pConnectorSize,
+  double pWidth,
+  double pConnectorMargin
+) {
 
-void OrGate::drawBody() {
+  Gate::setValues(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin);
+
+  if (pBaseSizePerc < DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC) {
+    baseSizePerc = DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC;
+  } else if (pBaseSizePerc > DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC) {
+    baseSizePerc = DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC;
+  } 
+};
+
+
+void OrGate::drawBody(bool drawConnectors) {
   double arcHeightPerc = 0;
   if (baseSizePerc != DEFAULT_GATE_BASE_SIZE_PERC) {
     arcHeightPerc = 1.0-baseSizePerc;
   } else {
     arcHeightPerc = 1.0/connectorCount;
   }  
-  if (arcHeightPerc < DEFAULT_GATE_MIN_ARC_HEIGHT_PERC) {
+  /*if (arcHeightPerc < DEFAULT_GATE_MIN_ARC_HEIGHT_PERC) {
     arcHeightPerc = DEFAULT_GATE_MIN_ARC_HEIGHT_PERC;
-  }
+  }*/
   double arcHeight = size * arcHeightPerc;
   double baseAdjust = 0;
-  if (arcHeight >= width/2.0) {
+  /*if (arcHeight >= width/2.0) {
     baseAdjust = arcHeight - (width / 2.0);
-  }   
+  } */  
+
+  Serial.println("s="+String(size)+",bh%="+String(baseSizePerc)+",ah%="+String(arcHeightPerc)+",ah="+String(arcHeight)+",ba="+String(baseAdjust));
 
   double baseArcHeight = width * DEFAULT_GATE_BASE_ARC_HEIGHT_ASPECT_RATIO;
   CircleInfo baseArc;
@@ -49,29 +82,36 @@ void OrGate::drawBody() {
     SCtrl::tft.fillRect(x,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //left line
     SCtrl::tft.fillRect(x+width-lineWidth,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //rigth line 
 
-    //adjust connectors;
-    double connMargin = connectorMargin;
-    if (lineWidth > 1) {
-      connMargin = connMargin - lineWidth / 2;
+    if (drawConnectors == true) {
+      //adjust connectors;
+      double connMargin = connectorMargin;
+      if (lineWidth > 1) {
+        connMargin = connMargin - lineWidth / 2;
+      }
+      for(int i = 0; i <= connectorCount / 2; i++) {
+        
+        connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
+        Serial.println("i" + String(i) + " c1 "+String(connectorSize)+" r " + String(baseArc.r) + " xc " + String(baseArc.x) + " " + String((x+connMargin)) + " y " + String(baseArc.y));
+        double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.x-(x+connMargin)); 
+        Serial.println("c2 "+String(newConnectorSize));
+        double newPos = baseArc.y-newConnectorSize;
+        newConnectorSize = newConnectorSize - (baseArc.y - (y + connectorSize));
+        Serial.println("c3 "+String(newConnectorSize));
+        drawConnector(i,newPos, newConnectorSize);
+        drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
+        
+        //break;   
+      }
     }
-    for(int i = 0; i < connectorCount; i++) {
-      
-      connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
-      Serial.println("i" + String(i) + " c1 "+String(connectorSize)+" r " + String(baseArc.r) + " xc " + String(baseArc.x) + " " + String((x+connMargin)) + " y " + String(baseArc.y));
-      double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.x-(x+connMargin)); 
-      Serial.println("c2 "+String(newConnectorSize));
-      double newPos = baseArc.y-newConnectorSize;
-      newConnectorSize = newConnectorSize - (baseArc.y - (y + connectorSize));
-      Serial.println("c3 "+String(newConnectorSize));
-      drawConnector(i,newPos, newConnectorSize);
-      
-      //break;   
-    }
+
+    double arcHeight2 = sqrt(pow((x+(width/2.0)) - x, 2.0) + pow((y-size+arcHeight-baseAdjust) - (y-size-baseAdjust), 2.0));  // Distância entre P1 e P2 (lado a)
+    arcHeight2 = arcHeight2 / 15; //divide o circulo em 15 partes, 
+
 
     for (int i = 0; i < lineWidth ; i++) {
       Serial.println("x1="+String(x+(width/2.0)-i)+",y1="+String(y-size-baseAdjust)+"x2="+String(x+width-i)+",y2="+String(y-size+arcHeight-baseAdjust));
-      SCtrl::drawArcFromArrow(x+i,y-size+arcHeight-baseAdjust,x+(width/2.0)-i,y-size-baseAdjust,arcHeight*0.2-i,lineColor);
-      SCtrl::drawArcFromArrow(x+(width/2.0)-i,y-size-baseAdjust,x+width-i,y-size+arcHeight-baseAdjust,arcHeight*0.2-i,lineColor);
+      SCtrl::drawArcFromArrow(x+i,y-size+arcHeight-baseAdjust,x+(width/2.0)-i,y-size-baseAdjust,arcHeight2-i,lineColor);
+      SCtrl::drawArcFromArrow(x+(width/2.0)-i,y-size-baseAdjust,x+width-i,y-size+arcHeight-baseAdjust,arcHeight2-i,lineColor);
     }
   } else {
     baseArc = SCtrl::drawArcFromArrow(x,y,x,y+width,baseArcHeight,lineColor);
@@ -83,28 +123,69 @@ void OrGate::drawBody() {
     SCtrl::tft.fillRect(x,y,size-arcHeight+baseAdjust,lineWidth,lineColor); //left line
     SCtrl::tft.fillRect(x,y+width-lineWidth,size-arcHeight+baseAdjust,lineWidth,lineColor); //rigth line
 
+    if (drawConnectors == true) {
+      //adjust connectors;
+      double connMargin = connectorMargin;
+      if (lineWidth > 1) {
+        connMargin = connMargin - lineWidth / 2;
+      }
+      for(int i = 0; i <= connectorCount / 2; i++) {
+        
+        connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
+        Serial.println("i" + String(i) + " c1 "+String(connectorSize)+" r " + String(baseArc.r) + " xc " + String(baseArc.x) + " " + String((x+connMargin)) + " y " + String(baseArc.y));
+        double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.y-(y+connMargin)); 
+        Serial.println("c2 "+String(newConnectorSize));
+        double newPos = baseArc.x+newConnectorSize;
+        newConnectorSize = newConnectorSize - (x - baseArc.x - connectorSize);
+        Serial.println("c3 "+String(newConnectorSize));
+        drawConnector(i,newPos, newConnectorSize);
+        drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
+        //break;   
+      }
+    }
 
-    //adjust connectors;
-    double connMargin = connectorMargin;
-    if (lineWidth > 1) {
-      connMargin = connMargin - lineWidth / 2;
-    }
-    for(int i = 0; i < connectorCount; i++) {
-      
-      connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
-      Serial.println("i" + String(i) + " c1 "+String(connectorSize)+" r " + String(baseArc.r) + " xc " + String(baseArc.x) + " " + String((x+connMargin)) + " y " + String(baseArc.y));
-      double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.y-(y+connMargin)); 
-      Serial.println("c2 "+String(newConnectorSize));
-      double newPos = baseArc.x+newConnectorSize;
-      newConnectorSize = newConnectorSize - (x - baseArc.x - connectorSize);
-      Serial.println("c3 "+String(newConnectorSize));
-      drawConnector(i,newPos, newConnectorSize);
-      
-      //break;   
-    }
+    /*for (int i = 0; i < lineWidth ; i++) {
+      SCtrl::drawArcFromArrow(x+size-arcHeight+baseAdjust,y+i,x+size-arcHeight+baseAdjust,y+width-i,arcHeight,lineColor);
+    }*/
+
+
+    double arcHeight2 = sqrt(pow((x+size-baseAdjust) - (x+size-arcHeight-baseAdjust), 2.0) + pow((y+width/2) - (y), 2.0));  // Distância entre P1 e P2 (lado a)
+    arcHeight2 = arcHeight2 / 15; //divide o circulo em 15 partes, 
+
 
     for (int i = 0; i < lineWidth ; i++) {
-      SCtrl::drawArcFromArrow(x+size-arcHeight+baseAdjust,y+i,x+size-arcHeight+baseAdjust,y+width-i,arcHeight,lineColor);
+      Serial.println("x1="+String(x+(width/2.0)-i)+",y1="+String(y-size-baseAdjust)+"x2="+String(x+width-i)+",y2="+String(y-size+arcHeight-baseAdjust));
+      SCtrl::drawArcFromArrow(x+size-arcHeight-baseAdjust,y+i,x+size-baseAdjust,y+width/2+i,arcHeight2-i,lineColor);
+      SCtrl::drawArcFromArrow(x+size-baseAdjust,y+width/2-i,x+size-arcHeight-baseAdjust,y+width-i,arcHeight2-i,lineColor);
     }
   }
+};
+
+void OrGate::draw(bool drawConnectors) {  
+  drawBody(drawConnectors);
+  if (drawConnectors == true) {
+    drawOutputConnector();
+  }
+};
+
+bool OrGate::calcOutputState(){
+  Serial.println("calculating gate output");
+  outputState = false;
+  if (hasInputs == true) {
+    if (inputs != nullptr) {
+      for (size_t i = 0; i < connectorCount; i++) {
+        Serial.println("gate("+String(i)+") " + String(inputs[i]->id) + "="+boolToString(inputs[i]->on));
+        outputState = outputState || inputs[i]->on;          
+        if (outputState) {
+          break;
+        };
+      };
+      bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
+      inputs[connectorCount]->recalcOnChange = false; 
+      inputs[connectorCount]->setState(outputState); 
+      inputs[connectorCount]->recalcOnChange = prevRecalcState;
+    };
+  };
+  Serial.println("calculated gate output:" + boolToString(outputState));
+  return outputState;
 };
