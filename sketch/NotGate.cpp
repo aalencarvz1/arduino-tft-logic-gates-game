@@ -19,8 +19,9 @@ NotGate::NotGate(
 ) :
   Gate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin) 
 {
+  connectorCount = 1;
   size = pSize;
-  setHasNot(true);
+  setHasNot(true);  
 };
 
 void NotGate::drawBody(bool drawConnectors) {

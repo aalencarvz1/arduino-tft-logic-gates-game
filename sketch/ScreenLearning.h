@@ -5,6 +5,7 @@
 #include "BaseScreen.h"
 
 struct ScreenLearning : public BaseScreen{
+  using BaseScreen::BaseScreen;
   static const byte SCREEN_ID = 1;
   void draw(char* params[] = nullptr) override;
 };

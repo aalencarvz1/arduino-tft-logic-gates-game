@@ -24,13 +24,13 @@ void Screens::goTo(byte screenId,char* params[]) {
 
   //find screen by id
   if (screenId == ScreenInitialMenu::SCREEN_ID) {
-    newScreen = new ScreenInitialMenu();
+    newScreen = new ScreenInitialMenu("PORTAS E CIRCUITOS",false);
   } else if (screenId == ScreenLearning::SCREEN_ID) {
-    newScreen = new ScreenLearning();
+    newScreen = new ScreenLearning("MODO TUTORIAL");
   } else if (screenId == ScreenPort::SCREEN_ID) {
-    newScreen = new ScreenPort();
+    newScreen = new ScreenPort("PORTAS");
   } else if (screenId == ScreenLearningGate::SCREEN_ID) {
-    newScreen = new ScreenLearningGate();
+    newScreen = new ScreenLearningGate("MODO TUTORIAL");
   };
 
   if (newScreen != nullptr) {    

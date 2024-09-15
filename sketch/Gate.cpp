@@ -396,7 +396,6 @@ void Gate::drawBody(bool drawConnectors) {
 }
 
 void Gate::drawNot(){
-  Serial.println("drawnot " + boolToString(hasNot));
   if (hasNot) {
     double cx = x+width/2;
     double cy = y-size-notRadius;

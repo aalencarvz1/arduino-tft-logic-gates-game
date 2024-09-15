@@ -5,7 +5,8 @@
 #include "BaseScreen.h"
 
 struct ScreenInitialMenu : public BaseScreen{
-  static const byte SCREEN_ID = 0;
+  using BaseScreen::BaseScreen;
+  static const byte SCREEN_ID = 0;  
   void draw(char* params[] = nullptr) override;
 };
 

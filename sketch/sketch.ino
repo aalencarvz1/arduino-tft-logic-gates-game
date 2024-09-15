@@ -1,6 +1,6 @@
 #include "SCtrl.h"
 #include "EVRcpt.h"
-#include "XorGate.h"
+#include "AndGate.h"
 #include "Screens.h"
 #include "ScreenInitialMenu.h"
 #include "ScreenLearning.h"
@@ -16,12 +16,12 @@ void setup() {
   //Screens::goTo(ScreenInitialMenu::SCREEN_ID);
   Screens::goTo(ScreenLearning::SCREEN_ID);
   //Screens::goTo(ScreenPort::SCREEN_ID);
-  /*XorGate* g = new XorGate(
+  /*AndGate* g = new AndGate(
     50.0, 
-    50.0,
-    DEFAULT_GATE_SIZE,
+    250.0,
+    30,//DEFAULT_GATE_SIZE,
     DEFAULT_GATE_CONNECTOR_COUNT,	
-    false,//DEFAULT_GATE_VERTICAL_DIRECTION,
+    DEFAULT_GATE_VERTICAL_DIRECTION,
     DEFAULT_GATE_LINE_COLOR,
     DEFAULT_GATE_LINE_WIDTH,
     DEFAULT_GATE_ASPECT_RATIO,
@@ -32,7 +32,7 @@ void setup() {
   );
   g->hasInputs=true;
   g->draw();*/
-
+  //ev = new EVRcpt
 }
 
 void loop() {
@@ -45,16 +45,14 @@ void loop() {
 
   //clicked
   if (p.z > 0 && !inClick) {
-    Serial.println("clicked");
     inClick = true;
-    Serial.println("xps "+String(SCtrl::TS_XP)+" " + String(SCtrl::TS_YP) + " " + String(SCtrl::TS_XM) + " " + String(SCtrl::TS_YM));    
+    //Serial.println("xps "+String(SCtrl::TS_XP)+" " + String(SCtrl::TS_YP) + " " + String(SCtrl::TS_XM) + " " + String(SCtrl::TS_YM));    
     DPoint uiP;
     int16_t px2 = p.x;
     int16_t py2 = p.y;
-    Serial.println("clicked 2");
-    uiP.x = map(p.y, SCtrl::TS_MINY, SCtrl::TS_MAXY, SCtrl::tft.width(),0);
-    uiP.y = map(px2, SCtrl::TS_MINX, SCtrl::TS_MAXX, SCtrl::tft.height(),0);
-    Serial.println("clicked on " + String(px2) + "," + String(py2) + " " +String(uiP.x) + "," + String(uiP.y) + " " + String(inClick));
+    uiP.x = map(p.y, SCtrl::TS_MINX, SCtrl::TS_MAXX, SCtrl::tft.width(),0);
+    uiP.y = map(px2, SCtrl::TS_MINY, SCtrl::TS_MAXY, SCtrl::tft.height(),0);
+    Serial.println("clicked on " + String(p.x) + "," + String(p.y) + " > " +String(uiP.x) + "," + String(uiP.y) + " " + String(inClick));
 
     //loop troght event receptors array, checking if is point in area of element
     EVRcpt* EVRcptTemp = lastEVRcpt;

@@ -7,13 +7,14 @@
 
 
 void ScreenInitialMenu::draw(char* params[]) {
-  SCtrl::tft.fillScreen(TFT_BLACK);  // Limpa a tela
+  BaseScreen::draw(params);
+  /*SCtrl::tft.fillScreen(TFT_BLACK);  // Limpa a tela
   SCtrl::tft.setTextColor(TFT_WHITE);
   SCtrl::tft.setTextSize(2);
   SCtrl::tft.setCursor(10, 10);
-  TextInfo ti = SCtrl::drawCenteredText("PORTAS E CIRCUITOS");
-  SCtrl::tft.drawRect(5, ti.h+10, SCtrl::tft.width() - 10, SCtrl::tft.height() - (ti.h+10), TFT_WHITE);
-  ti = SCtrl::drawCenteredText("Modos de jogo",ti.h+20);
+  TextInfo ti = SCtrl::drawCenteredText("PORTAS E CIRCUITOS");*/
+  //SCtrl::tft.drawRect(5, titleInfo.h+10, SCtrl::tft.width() - 10, SCtrl::tft.height() - (titleInfo.h+10), TFT_WHITE);
+  SCtrl::drawCenteredText("Modos de jogo",titleInfo.h+20);
   double _4Div = SCtrl::tft.width() / 4.0;
   double itemMenuXPos = _4Div / 2.0;
   double itemMenuYPos = SCtrl::tft.height() / 2.0;

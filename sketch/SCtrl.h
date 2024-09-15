@@ -29,10 +29,10 @@ struct SCtrl {
   static const int TS_YM  = 9;  // Substitua pelo pino correto
 
   // Definição das variáveis de calibração do touchscreen
-  static const int TS_MINX  = 100;
-  static const int TS_MAXX  = 920;
-  static const int TS_MINY  = 120;
-  static const int TS_MAXY  = 920;
+  static const int TS_MINX  = 80;
+  static const int TS_MAXX  = 960;
+  static const int TS_MINY  = 100;
+  static const int TS_MAXY  = 930;
 
   // Configuração do touchscreen
   static TouchScreen ts;
