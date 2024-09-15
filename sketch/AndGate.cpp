@@ -65,6 +65,7 @@ bool AndGate::calcOutputState(){
           break;
         };
       };
+      outputState = hasNot ? !outputState : outputState;
       bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
       inputs[connectorCount]->recalcOnChange = false; 
       inputs[connectorCount]->setState(outputState); 

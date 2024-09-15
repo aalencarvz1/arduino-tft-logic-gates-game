@@ -1,6 +1,6 @@
 #include "SCtrl.h"
 #include "EVRcpt.h"
-#include "AndGate.h"
+#include "XorGate.h"
 #include "Screens.h"
 #include "ScreenInitialMenu.h"
 #include "ScreenLearning.h"
@@ -14,17 +14,17 @@ void setup() {
   SCtrl::init(); 
   SCtrl::tft.fillScreen(TFT_BLACK);
   //Screens::goTo(ScreenInitialMenu::SCREEN_ID);
-  //Screens::goTo(ScreenLearning::SCREEN_ID);
-  Screens::goTo(ScreenPort::SCREEN_ID);
-  /*AndGate* g = new AndGate(
+  Screens::goTo(ScreenLearning::SCREEN_ID);
+  //Screens::goTo(ScreenPort::SCREEN_ID);
+  /*XorGate* g = new XorGate(
     50.0, 
     50.0,
     DEFAULT_GATE_SIZE,
-    4,//DEFAULT_GATE_CONNECTOR_COUNT,	
-    DEFAULT_GATE_VERTICAL_DIRECTION,
+    DEFAULT_GATE_CONNECTOR_COUNT,	
+    false,//DEFAULT_GATE_VERTICAL_DIRECTION,
     DEFAULT_GATE_LINE_COLOR,
     DEFAULT_GATE_LINE_WIDTH,
-    1.5,//DEFAULT_GATE_ASPECT_RATIO,
+    DEFAULT_GATE_ASPECT_RATIO,
     DEFAULT_GATE_BASE_SIZE_PERC,
     DEFAULT_GATE_CONNECTOR_SIZE,
     DEFAULT_GATE_WIDTH,

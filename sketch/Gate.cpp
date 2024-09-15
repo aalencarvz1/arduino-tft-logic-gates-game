@@ -96,6 +96,10 @@ Gate::Gate(
     if (pWidth == DEFAULT_GATE_WIDTH) {
       width = pSize * pAspectRatio;
       connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;      
+      notRadius = (width + pSize) / 2 * DEFAULT_GATE_NOT_RADIUS_PERC;
+      if (notRadius > DEFAULT_GATE_MAX_NOT_RADIUS) {
+        notRadius = DEFAULT_GATE_MAX_NOT_RADIUS;
+      }
     } 
     if (pConnectorSize == DEFAULT_GATE_CONNECTOR_SIZE) {
       connectorSize = width * DEFAULT_GATE_CONNECTOR_SIZE_PERC;      
@@ -108,6 +112,10 @@ Gate::Gate(
     if (pWidth == DEFAULT_GATE_WIDTH) {      
       width = pSize * pAspectRatio;
       connectorMargin = width * DEFAULT_GATE_CONNECTOR_MARGIN_PERC;
+      notRadius = (width + pSize) / 2 * DEFAULT_GATE_NOT_RADIUS_PERC;
+      if (notRadius > DEFAULT_GATE_MAX_NOT_RADIUS) {
+        notRadius = DEFAULT_GATE_MAX_NOT_RADIUS;
+      }
     }
   }
   
@@ -202,6 +210,16 @@ void Gate::setValues(
   }
   Serial.println("no fim constructor");
 };
+
+void Gate::setHasNot(bool pHasNot) {
+  hasNot = pHasNot;
+  if (hasNot) {
+    notRadius = ((size + size * aspectRatio) / 2) * DEFAULT_GATE_NOT_RADIUS_PERC;
+    if (notRadius > DEFAULT_GATE_MAX_NOT_RADIUS) {
+      notRadius = DEFAULT_GATE_MAX_NOT_RADIUS;
+    }
+  }
+}
 
 void Gate::freeInputs(){
   if (inputs != nullptr) {
@@ -309,13 +327,18 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
 
 void Gate::drawOutputConnector() {   
   if (vertical) {
+    double py1 = y - size - connectorSize;
+    double py2 = y - size;
+    if (hasNot) {
+      py2 = py2 - (notRadius * 2);
+    }
     if (lineWidth > 1) {
       double pInit = x + (width / 2 ) - (lineWidth / 2);
       for (int i = 0; i < lineWidth; i++) {
-        SCtrl::tft.drawLine(pInit+i ,y - size - connectorSize,pInit+i,y - size , lineColor);
+        SCtrl::tft.drawLine(pInit+i ,py1,pInit+i,py2 , lineColor);
       }
     } else {
-      SCtrl::tft.drawLine(x + (width / 2 ) ,y - size - connectorSize,x + (width / 2 ),y - size , lineColor);
+      SCtrl::tft.drawLine(x + (width / 2 ) ,py1,x + (width / 2 ),py2, lineColor);
     }
 
     if (hasInputs == true) {
@@ -335,13 +358,18 @@ void Gate::drawOutputConnector() {
       inputs[connectorCount]->draw();
     }
   } else {
+    double px1 = x + size;
+    double px2 = x + size + connectorSize;
+    if (hasNot) {
+      px1 = px1 + (notRadius * 2);
+    }
     if (lineWidth > 1) {
       double pInit = y + (width / 2) - (lineWidth / 2);
       for (int i = 0; i < lineWidth; i++) {
-        SCtrl::tft.drawLine(x + size ,pInit + i,x + size + connectorSize,pInit + i, lineColor);
+        SCtrl::tft.drawLine(px1 ,pInit + i,px2,pInit + i, lineColor);
       }
     } else {
-      SCtrl::tft.drawLine(x + size ,y + (width/2),x + size + connectorSize,y + (width/2), lineColor);
+      SCtrl::tft.drawLine(px1,y + (width/2),px2,y + (width/2), lineColor);
     }
 
     if (hasInputs == true) {
@@ -367,6 +395,19 @@ void Gate::drawBody(bool drawConnectors) {
   //to override
 }
 
+void Gate::drawNot(){
+  Serial.println("drawnot " + boolToString(hasNot));
+  if (hasNot) {
+    double cx = x+width/2;
+    double cy = y-size-notRadius;
+    if (!vertical) {
+      cx = x+size+notRadius;
+      cy = y+width/2;
+    }
+    SCtrl::tft.drawCircle(cx,cy,notRadius,lineColor);
+  }
+}
+
 void Gate::draw(bool drawConnectors) {
   if (drawConnectors == true) {
     for(int i = 0; i < connectorCount; i++) {
@@ -375,6 +416,7 @@ void Gate::draw(bool drawConnectors) {
     drawOutputConnector();
   }
   drawBody(drawConnectors);
+  drawNot();
 };
 
 bool Gate::calcOutputState(){

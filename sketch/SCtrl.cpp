@@ -22,7 +22,7 @@ void SCtrl::init(){
 };
 
 
-TextInfo SCtrl::drawCenteredText(const char* text, double y, double centerX, double textSize, int color) {
+TextInfo SCtrl::drawCenteredText(char* text, double y, double centerX, double textSize, int color) {
     // Defina o tamanho da fonte
     SCtrl::tft.setTextSize(textSize);
     SCtrl::tft.setTextColor(color);
@@ -48,7 +48,7 @@ TextInfo SCtrl::drawCenteredText(const char* text, double y, double centerX, dou
 };
 
 
-static void SCtrl::drawRoundButton(double x,double y,double r,int color,const char* text, bool hasCenterPlay, bool hasBorder, double textDistance = 20, void (*onClick)()) {
+static void SCtrl::drawRoundButton(double x,double y,double r,int color,char* text, bool hasCenterPlay, bool hasBorder, double textDistance = 20, void (*onClick)()) {
   if (hasBorder) {
     SCtrl::tft.drawCircle(x,y,r,color);
     SCtrl::tft.drawCircle(x,y,r-1.0,color);

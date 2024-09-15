@@ -41,8 +41,8 @@ struct SCtrl {
 
   static void init();
 
-  static TextInfo drawCenteredText(const char* text, double y = 0, double centerX = SCtrl::tft.width() * 1.0 / 2.0, double textSize = 2, int color = TFT_WHITE);
-  static void drawRoundButton(double x,double y,double r,int color,const char* text="", bool hasCenterPlay=true, bool hasBorder=true, double textDistance = 20, void (*onClick)() = nullptr);
+  static TextInfo drawCenteredText(char* text, double y = 0, double centerX = SCtrl::tft.width() * 1.0 / 2.0, double textSize = 2, int color = TFT_WHITE);
+  static void drawRoundButton(double x,double y,double r,int color,char* text="", bool hasCenterPlay=true, bool hasBorder=true, double textDistance = 20, void (*onClick)() = nullptr);
   static void drawSmoothArc(double x_center, double y_center, double radius, double start_angle, double end_angle, uint16_t color = TFT_WHITE);
   static CircleInfo drawArcFromArrow(double x1, double y1, double x2, double y2, double arcHeight, int color = TFT_WHITE);
   

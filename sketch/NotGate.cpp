@@ -17,7 +17,11 @@ NotGate::NotGate(
   double pWidth,
   double pConnectorMargin
 ) :
-  Gate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin) {};
+  Gate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin) 
+{
+  size = pSize;
+  setHasNot(true);
+};
 
 void NotGate::drawBody(bool drawConnectors) {
   double arcHeightPerc = 0;
@@ -34,20 +38,20 @@ void NotGate::drawBody(bool drawConnectors) {
   if (arcHeight >= width/2.0) {
     baseAdjust = arcHeight - (width / 2.0);
   }   
-  double nr = ((size + width) / 2) * 0.06;
+  
     
   if (vertical) {
     SCtrl::tft.drawLine(x,y,x+width,y, lineColor);
     SCtrl::tft.drawLine(x,y,x+width/2,y-size, lineColor);
     SCtrl::tft.drawLine(x+width,y,x+width/2,y-size, lineColor);
-    SCtrl::tft.fillCircle(x+width/2,y-size-nr/2,nr,DEFAULT_BACKGROUND_COLOR);
-    SCtrl::tft.drawCircle(x+width/2,y-size-nr/2,nr,lineColor);
+    //SCtrl::tft.fillCircle(x+width/2,y-size-nr/2,nr,DEFAULT_BACKGROUND_COLOR);
+    //SCtrl::tft.drawCircle(x+width/2,y-size-nr/2,nr,lineColor);
   } else {
     SCtrl::tft.drawLine(x,y,x,y+width, lineColor);
     SCtrl::tft.drawLine(x,y,x+size,y+width/2, lineColor);
     SCtrl::tft.drawLine(x,y+width,x+size,y+width/2, lineColor);
-    SCtrl::tft.fillCircle(x+size+nr/2,y+width/2,nr,DEFAULT_BACKGROUND_COLOR);
-    SCtrl::tft.drawCircle(x+size+nr/2,y+width/2,nr,lineColor);
+    //SCtrl::tft.fillCircle(x+size+nr/2,y+width/2,nr,DEFAULT_BACKGROUND_COLOR);
+    //SCtrl::tft.drawCircle(x+size+nr/2,y+width/2,nr,lineColor);
   }    
 };
 

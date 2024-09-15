@@ -75,10 +75,15 @@ void OrGate::drawBody(bool drawConnectors) {
   if (vertical) {    
     baseArc = SCtrl::drawArcFromArrow(x,y,x+width,y,baseArcHeight,lineColor);
     if (lineWidth > 1) {
-      for (int i = 0; i < lineWidth ; i++) {
+      for (int i = 1; i < lineWidth ; i++) {
         SCtrl::drawArcFromArrow(x+i,y,x+width-i,y,baseArcHeight-i,lineColor);
       }
     }
+
+    if (isExclusive) {
+      SCtrl::drawArcFromArrow(x,y+size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,x+width,y+size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,baseArcHeight,lineColor);
+    }
+
     SCtrl::tft.fillRect(x,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //left line
     SCtrl::tft.fillRect(x+width-lineWidth,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //rigth line 
 
@@ -116,10 +121,15 @@ void OrGate::drawBody(bool drawConnectors) {
   } else {
     baseArc = SCtrl::drawArcFromArrow(x,y,x,y+width,baseArcHeight,lineColor);
     if (lineWidth > 1) {
-      for (int i = 0; i < lineWidth ; i++) {
+      for (int i = 1; i < lineWidth ; i++) {
         SCtrl::drawArcFromArrow(x,y+i,x,y+width-i,baseArcHeight-i,lineColor);
       }
     }
+
+    if (isExclusive) {
+      baseArc = SCtrl::drawArcFromArrow(x-size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,y,x-size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,y+width,baseArcHeight,lineColor);
+    }
+
     SCtrl::tft.fillRect(x,y,size-arcHeight+baseAdjust,lineWidth,lineColor); //left line
     SCtrl::tft.fillRect(x,y+width-lineWidth,size-arcHeight+baseAdjust,lineWidth,lineColor); //rigth line
 
@@ -166,6 +176,7 @@ void OrGate::draw(bool drawConnectors) {
   if (drawConnectors == true) {
     drawOutputConnector();
   }
+  drawNot();
 };
 
 bool OrGate::calcOutputState(){
@@ -180,6 +191,7 @@ bool OrGate::calcOutputState(){
           break;
         };
       };
+      outputState = hasNot ? !outputState : outputState;
       bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
       inputs[connectorCount]->recalcOnChange = false; 
       inputs[connectorCount]->setState(outputState); 
