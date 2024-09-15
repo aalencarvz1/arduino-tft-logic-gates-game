@@ -9,7 +9,7 @@
 #define DEFAULT_GATE_VERTICAL_DIRECTION true
 #define DEFAULT_GATE_LINE_COLOR TFT_WHITE
 #define DEFAULT_GATE_LINE_WIDTH 1.0
-#define DEFAULT_GATE_ASPECT_RATIO 1
+#define DEFAULT_GATE_ASPECT_RATIO 1.0
 #define DEFAULT_GATE_BASE_SIZE_PERC 0.5
 #define DEFAULT_GATE_BASE_CURVE_PERC 0.3
 
@@ -23,14 +23,15 @@
 #define DEFAULT_GATE_BASE_ARC_HEIGHT_ASPECT_RATIO 0.3
 #define DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC 0.3
 #define DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC 0.6
-
-
+#define DEFAULT_GATE_NOT_RADIUS_PERC 0.12
+#define DEFAULT_GATE_MAX_NOT_RADIUS 8.0
+#define DEFAULT_GATE_EXCLUSIVE_SPACE_PERC 0.1
 
 #define DEFAULT_GATE_INPUT_OFF_COLOR TFT_RED
 #define DEFAULT_GATE_INPUT_ON_COLOR TFT_GREEN
 #define DEFAULT_GATE_INPUT_RADIUS_PERC 0.15
-#define DEFAULT_GATE_MIN_INPUT_RADIUS 10
-#define DEFAULT_GATE_MAX_INPUT_RADIUS 30
+#define DEFAULT_GATE_MIN_INPUT_RADIUS 10.0
+#define DEFAULT_GATE_MAX_INPUT_RADIUS 30.0
 
 
 struct Gate; //forhard
@@ -81,6 +82,11 @@ struct Gate {
   double firstConnectorY;
 
   bool hasInputs = false;
+  bool hasNot = false;
+  double notRadius = 0;
+
+  bool isExclusive = false;
+
   GateInput** inputs = nullptr;
 
   bool outputState = false;
@@ -110,6 +116,7 @@ struct Gate {
   void setAspectRatio(double pAspectRatio);
   void setSize(double pSize);
   void setConnectorCount(byte pConnectorCount);
+  void setHasNot(bool pHasNot = false);
   virtual void setValues(
     double pX                = 150.0, 
     double pY                = 250.0,
@@ -131,7 +138,7 @@ struct Gate {
   virtual void drawOutputConnector();
   virtual void drawBody(bool drawConnectors = true);      
   virtual void draw(bool drawConnectors = true);
-
+  virtual void drawNot();
   virtual bool calcOutputState();
 };
 

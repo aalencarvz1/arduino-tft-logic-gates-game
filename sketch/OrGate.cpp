@@ -59,100 +59,102 @@ void OrGate::drawBody(bool drawConnectors) {
   } else {
     arcHeightPerc = 1.0/connectorCount;
   }  
-  /*if (arcHeightPerc < DEFAULT_GATE_MIN_ARC_HEIGHT_PERC) {
-    arcHeightPerc = DEFAULT_GATE_MIN_ARC_HEIGHT_PERC;
-  }*/
   double arcHeight = size * arcHeightPerc;
   double baseAdjust = 0;
-  /*if (arcHeight >= width/2.0) {
-    baseAdjust = arcHeight - (width / 2.0);
-  } */  
-
-  Serial.println("s="+String(size)+",bh%="+String(baseSizePerc)+",ah%="+String(arcHeightPerc)+",ah="+String(arcHeight)+",ba="+String(baseAdjust));
 
   double baseArcHeight = width * DEFAULT_GATE_BASE_ARC_HEIGHT_ASPECT_RATIO;
   CircleInfo baseArc;
-  if (vertical) {    
+  if (vertical) {  
+
+    //draw curved base  
     baseArc = SCtrl::drawArcFromArrow(x,y,x+width,y,baseArcHeight,lineColor);
     if (lineWidth > 1) {
-      for (int i = 0; i < lineWidth ; i++) {
+      for (int i = 1; i < lineWidth ; i++) {
         SCtrl::drawArcFromArrow(x+i,y,x+width-i,y,baseArcHeight-i,lineColor);
       }
     }
-    SCtrl::tft.fillRect(x,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //left line
-    SCtrl::tft.fillRect(x+width-lineWidth,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //rigth line 
 
+    // draw curved exclusive base    
+    if (isExclusive) {
+      SCtrl::drawArcFromArrow(x,y+size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,x+width,y+size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,baseArcHeight,lineColor);
+    }
+
+    //draw laterals
+    if (lineWidth > 1) {
+      SCtrl::tft.fillRect(x,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //left line
+      SCtrl::tft.fillRect(x+width-lineWidth,y-size+arcHeight-baseAdjust,lineWidth,size-arcHeight+baseAdjust,lineColor); //rigth line 
+    } else {
+      SCtrl::tft.drawLine(x,y-size+arcHeight-baseAdjust,x,y,lineColor); //left line
+      SCtrl::tft.drawLine(x+width,y-size+arcHeight-baseAdjust,x+width,y,lineColor); //rigth line 
+    }
+
+    //draw connectors
     if (drawConnectors == true) {
-      //adjust connectors;
       double connMargin = connectorMargin;
       if (lineWidth > 1) {
         connMargin = connMargin - lineWidth / 2;
       }
-      for(int i = 0; i <= connectorCount / 2; i++) {
-        
+      for(int i = 0; i <= connectorCount / 2; i++) {        
         connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
-        Serial.println("i" + String(i) + " c1 "+String(connectorSize)+" r " + String(baseArc.r) + " xc " + String(baseArc.x) + " " + String((x+connMargin)) + " y " + String(baseArc.y));
         double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.x-(x+connMargin)); 
-        Serial.println("c2 "+String(newConnectorSize));
         double newPos = baseArc.y-newConnectorSize;
         newConnectorSize = newConnectorSize - (baseArc.y - (y + connectorSize));
-        Serial.println("c3 "+String(newConnectorSize));
         drawConnector(i,newPos, newConnectorSize);
         drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
-        
-        //break;   
       }
     }
 
+    //draw top curved arcs
     double arcHeight2 = sqrt(pow((x+(width/2.0)) - x, 2.0) + pow((y-size+arcHeight-baseAdjust) - (y-size-baseAdjust), 2.0));  // Distância entre P1 e P2 (lado a)
     arcHeight2 = arcHeight2 / 15; //divide o circulo em 15 partes, 
-
-
     for (int i = 0; i < lineWidth ; i++) {
       Serial.println("x1="+String(x+(width/2.0)-i)+",y1="+String(y-size-baseAdjust)+"x2="+String(x+width-i)+",y2="+String(y-size+arcHeight-baseAdjust));
       SCtrl::drawArcFromArrow(x+i,y-size+arcHeight-baseAdjust,x+(width/2.0)-i,y-size-baseAdjust,arcHeight2-i,lineColor);
       SCtrl::drawArcFromArrow(x+(width/2.0)-i,y-size-baseAdjust,x+width-i,y-size+arcHeight-baseAdjust,arcHeight2-i,lineColor);
     }
   } else {
+
+    //draw base arc
     baseArc = SCtrl::drawArcFromArrow(x,y,x,y+width,baseArcHeight,lineColor);
     if (lineWidth > 1) {
-      for (int i = 0; i < lineWidth ; i++) {
+      for (int i = 1; i < lineWidth ; i++) {
         SCtrl::drawArcFromArrow(x,y+i,x,y+width-i,baseArcHeight-i,lineColor);
       }
     }
-    SCtrl::tft.fillRect(x,y,size-arcHeight+baseAdjust,lineWidth,lineColor); //left line
-    SCtrl::tft.fillRect(x,y+width-lineWidth,size-arcHeight+baseAdjust,lineWidth,lineColor); //rigth line
 
+    //draw exclusive curved bar
+    if (isExclusive) {
+      baseArc = SCtrl::drawArcFromArrow(x-size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,y,x-size * DEFAULT_GATE_EXCLUSIVE_SPACE_PERC,y+width,baseArcHeight,lineColor);
+    }
+
+    //draw laterals
+    if (lineWidth > 1) {
+      SCtrl::tft.fillRect(x,y,size-arcHeight+baseAdjust,lineWidth,lineColor); //left line
+      SCtrl::tft.fillRect(x,y+width-lineWidth,size-arcHeight+baseAdjust,lineWidth,lineColor); //rigth line
+    } else {
+      SCtrl::tft.drawLine(x,y,x+size-arcHeight+baseAdjust,y,lineColor); //left line
+      SCtrl::tft.drawLine(x,y+width,x+size-arcHeight+baseAdjust,y,lineColor); //rigth line
+    }
+
+    //draw conectors
     if (drawConnectors == true) {
-      //adjust connectors;
       double connMargin = connectorMargin;
       if (lineWidth > 1) {
         connMargin = connMargin - lineWidth / 2;
       }
-      for(int i = 0; i <= connectorCount / 2; i++) {
-        
+      for(int i = 0; i <= connectorCount / 2; i++) {        
         connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
-        Serial.println("i" + String(i) + " c1 "+String(connectorSize)+" r " + String(baseArc.r) + " xc " + String(baseArc.x) + " " + String((x+connMargin)) + " y " + String(baseArc.y));
         double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.y-(y+connMargin)); 
-        Serial.println("c2 "+String(newConnectorSize));
         double newPos = baseArc.x+newConnectorSize;
         newConnectorSize = newConnectorSize - (x - baseArc.x - connectorSize);
-        Serial.println("c3 "+String(newConnectorSize));
         drawConnector(i,newPos, newConnectorSize);
         drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
-        //break;   
       }
     }
 
-    /*for (int i = 0; i < lineWidth ; i++) {
-      SCtrl::drawArcFromArrow(x+size-arcHeight+baseAdjust,y+i,x+size-arcHeight+baseAdjust,y+width-i,arcHeight,lineColor);
-    }*/
-
-
+    //draw top curved arcs
     double arcHeight2 = sqrt(pow((x+size-baseAdjust) - (x+size-arcHeight-baseAdjust), 2.0) + pow((y+width/2) - (y), 2.0));  // Distância entre P1 e P2 (lado a)
-    arcHeight2 = arcHeight2 / 15; //divide o circulo em 15 partes, 
-
-
+    arcHeight2 = arcHeight2 / 15; //divide o circulo em 15 partes para obter uma curva suave (raio grande), 
     for (int i = 0; i < lineWidth ; i++) {
       Serial.println("x1="+String(x+(width/2.0)-i)+",y1="+String(y-size-baseAdjust)+"x2="+String(x+width-i)+",y2="+String(y-size+arcHeight-baseAdjust));
       SCtrl::drawArcFromArrow(x+size-arcHeight-baseAdjust,y+i,x+size-baseAdjust,y+width/2+i,arcHeight2-i,lineColor);
@@ -166,6 +168,7 @@ void OrGate::draw(bool drawConnectors) {
   if (drawConnectors == true) {
     drawOutputConnector();
   }
+  drawNot();
 };
 
 bool OrGate::calcOutputState(){
@@ -180,6 +183,7 @@ bool OrGate::calcOutputState(){
           break;
         };
       };
+      outputState = hasNot ? !outputState : outputState;
       bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
       inputs[connectorCount]->recalcOnChange = false; 
       inputs[connectorCount]->setState(outputState); 

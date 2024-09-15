@@ -105,30 +105,22 @@ void drawRandomGate(Gate* g){
 };
 
 
+
 void ScreenPort::draw(char* params[]){
-    SCtrl::tft.fillScreen(TFT_BLACK);  // Limpa a tela
-    SCtrl::tft.setTextColor(TFT_WHITE);
-    SCtrl::tft.setTextSize(2);
-    SCtrl::tft.setCursor(10, 10);
-    TextInfo ti = SCtrl::drawCenteredText("MODO TUTORIAL");
-    this->drawBackButton();
-    SCtrl::tft.drawRect(5, ti.h+10, SCtrl::tft.width() - 10, SCtrl::tft.height() - (ti.h+10), TFT_WHITE);
-    ti = SCtrl::drawCenteredText("Porta AND",ti.h+20);
-
-
-    if (params != nullptr) {
-      Gate* g = nullptr;
-      if (params[0] == "AND") {
-        g = new AndGate();        
-      } else if (params[0] == "OR") {
-        g = new OrGate();
-      } else {
-        g = nullptr; //random        
-      }
-      drawRandomGate(g);
-      delete g;
-      g = nullptr;
+  BaseScreen::draw(params);
+  if (params != nullptr) {
+    Gate* g = nullptr;
+    if (params[0] == "AND") {
+      g = new AndGate();        
+    } else if (params[0] == "OR") {
+      g = new OrGate();
     } else {
-      drawRandomGate(nullptr);
+      g = nullptr; //random        
     }
-  };
+    drawRandomGate(g);
+    delete g;
+    g = nullptr;
+  } else {
+    drawRandomGate(nullptr);
+  }
+};

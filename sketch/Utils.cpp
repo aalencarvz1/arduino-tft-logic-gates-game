@@ -61,3 +61,15 @@ double getCatetoFromPitagoras(double hip, double cat1) {
 String boolToString(bool v) {
   return v == true ? "true" : "false";
 }
+
+void toUpperCase(char* str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = toupper(str[i]);
+    }
+}
+
+void toLowerCase(char* str) {
+    for (int i = 0; str[i]; i++) {
+        str[i] = tolower(str[i]);
+    }
+}

@@ -13,18 +13,18 @@ void setup() {
   Serial.begin(9600);
   SCtrl::init(); 
   SCtrl::tft.fillScreen(TFT_BLACK);
-  //Screens::goTo(ScreenInitialMenu::SCREEN_ID);
+  Screens::goTo(ScreenInitialMenu::SCREEN_ID);
   //Screens::goTo(ScreenLearning::SCREEN_ID);
-  Screens::goTo(ScreenPort::SCREEN_ID);
+  //Screens::goTo(ScreenPort::SCREEN_ID);
   /*AndGate* g = new AndGate(
     50.0, 
-    50.0,
-    DEFAULT_GATE_SIZE,
-    4,//DEFAULT_GATE_CONNECTOR_COUNT,	
+    250.0,
+    30,//DEFAULT_GATE_SIZE,
+    DEFAULT_GATE_CONNECTOR_COUNT,	
     DEFAULT_GATE_VERTICAL_DIRECTION,
     DEFAULT_GATE_LINE_COLOR,
     DEFAULT_GATE_LINE_WIDTH,
-    1.5,//DEFAULT_GATE_ASPECT_RATIO,
+    DEFAULT_GATE_ASPECT_RATIO,
     DEFAULT_GATE_BASE_SIZE_PERC,
     DEFAULT_GATE_CONNECTOR_SIZE,
     DEFAULT_GATE_WIDTH,
@@ -32,7 +32,7 @@ void setup() {
   );
   g->hasInputs=true;
   g->draw();*/
-
+  //ev = new EVRcpt
 }
 
 void loop() {
@@ -45,16 +45,14 @@ void loop() {
 
   //clicked
   if (p.z > 0 && !inClick) {
-    Serial.println("clicked");
     inClick = true;
-    Serial.println("xps "+String(SCtrl::TS_XP)+" " + String(SCtrl::TS_YP) + " " + String(SCtrl::TS_XM) + " " + String(SCtrl::TS_YM));    
+    //Serial.println("xps "+String(SCtrl::TS_XP)+" " + String(SCtrl::TS_YP) + " " + String(SCtrl::TS_XM) + " " + String(SCtrl::TS_YM));    
     DPoint uiP;
     int16_t px2 = p.x;
     int16_t py2 = p.y;
-    Serial.println("clicked 2");
-    uiP.x = map(p.y, SCtrl::TS_MINY, SCtrl::TS_MAXY, SCtrl::tft.width(),0);
-    uiP.y = map(px2, SCtrl::TS_MINX, SCtrl::TS_MAXX, SCtrl::tft.height(),0);
-    Serial.println("clicked on " + String(px2) + "," + String(py2) + " " +String(uiP.x) + "," + String(uiP.y) + " " + String(inClick));
+    uiP.x = map(p.y, SCtrl::TS_MINX, SCtrl::TS_MAXX, SCtrl::tft.width(),0);
+    uiP.y = map(px2, SCtrl::TS_MINY, SCtrl::TS_MAXY, SCtrl::tft.height(),0);
+    Serial.println("clicked on " + String(p.x) + "," + String(p.y) + " > " +String(uiP.x) + "," + String(uiP.y) + " " + String(inClick));
 
     //loop troght event receptors array, checking if is point in area of element
     EVRcpt* EVRcptTemp = lastEVRcpt;
