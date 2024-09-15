@@ -13,8 +13,8 @@ void setup() {
   Serial.begin(9600);
   SCtrl::init(); 
   SCtrl::tft.fillScreen(TFT_BLACK);
-  //Screens::goTo(ScreenInitialMenu::SCREEN_ID);
-  Screens::goTo(ScreenLearning::SCREEN_ID);
+  Screens::goTo(ScreenInitialMenu::SCREEN_ID);
+  //Screens::goTo(ScreenLearning::SCREEN_ID);
   //Screens::goTo(ScreenPort::SCREEN_ID);
   /*AndGate* g = new AndGate(
     50.0, 
