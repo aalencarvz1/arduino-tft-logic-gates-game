@@ -45,6 +45,7 @@ struct SCtrl {
   static void drawRoundButton(double x,double y,double r,int color,char* text="", bool hasCenterPlay=true, bool hasBorder=true, double textDistance = 20, void (*onClick)() = nullptr);
   static void drawSmoothArc(double x_center, double y_center, double radius, double start_angle, double end_angle, uint16_t color = TFT_WHITE);
   static CircleInfo drawArcFromArrow(double x1, double y1, double x2, double y2, double arcHeight, int color = TFT_WHITE);
+  static void drawRoundedPlay(double cx,double cy,double r,double round = 0,int backgroundColor = TFT_BLACK,int color = TFT_WHITE,double multiplier = 1);
   
 
 };

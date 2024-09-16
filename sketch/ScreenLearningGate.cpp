@@ -11,124 +11,153 @@
 #include "XnorGate.h"
 #include "EVRcpt.h"
 #include "Screens.h"
+#include "Gates.h"
 
-void ScreenLearningGate::draw(char* params[]){
-  BaseScreen::draw(params);
-  
-  if (params != nullptr) {
-    Gate* g = nullptr;
-    double gateSize = SCtrl::tft.height()-190;
-    double gateWidth = gateSize * DEFAULT_GATE_ASPECT_RATIO;
-    double gateX = SCtrl::tft.width() / 2 - gateWidth / 2;
-    double gateY = SCtrl::tft.height() - 75;
-    if (params[0] == "AND") {
-      g = new AndGate(
-        gateX,
-        gateY,
-        gateSize,
-        DEFAULT_GATE_CONNECTOR_COUNT,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );        
-    } else if (params[0] == "OR") {
-      g = new OrGate(
-        gateX,
-        gateY,
-        gateSize,
-        DEFAULT_GATE_CONNECTOR_COUNT,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );
-    } else if (params[0] == "NOT") {
-      g = new NotGate(
-        gateX,
-        gateY,
-        gateSize,
-        1,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );
-    } else if (params[0] == "NAND") {
-      g = new NandGate(
-        gateX,
-        gateY,
-        gateSize,
-        DEFAULT_GATE_CONNECTOR_COUNT,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );
-    } else if (params[0] == "NOR") {
-      g = new NorGate(
-        gateX,
-        gateY,
-        gateSize,
-        DEFAULT_GATE_CONNECTOR_COUNT,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );
-    } else if (params[0] == "XOR") {
-      g = new XorGate(
-        gateX,
-        gateY,
-        gateSize,
-        DEFAULT_GATE_CONNECTOR_COUNT,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );
-    } else if (params[0] == "XNOR") {
-      g = new XnorGate(
-        gateX,
-        gateY,
-        gateSize,
-        DEFAULT_GATE_CONNECTOR_COUNT,
-        DEFAULT_GATE_VERTICAL_DIRECTION,
-        DEFAULT_GATE_LINE_COLOR,
-        DEFAULT_GATE_LINE_WIDTH,
-        DEFAULT_GATE_ASPECT_RATIO,
-        DEFAULT_GATE_BASE_SIZE_PERC,
-        DEFAULT_GATE_CONNECTOR_SIZE,
-        gateWidth
-      );
-    } else {
-      g = nullptr; //random        
-    }
-    if (g != nullptr) {
-      g->hasInputs = true;
-      g->draw();            
-    }
 
-    /*delete g;
-    g = nullptr;*/
+const char* portas[] = {"AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"};
+const int totalPortas = sizeof(portas) / sizeof(portas[0]);
+
+
+// Função para encontrar a próxima porta no array
+const char* getNext(const char* nomePorta) {
+    for (int i = 0; i < totalPortas; i++) {
+        if (strcmp(portas[i], nomePorta) == 0) {
+            // Se for a última porta, retorna a primeira
+            if (i == totalPortas - 1) {
+                return portas[0];
+            } else {
+                // Senão, retorna a próxima porta
+                return portas[i + 1];
+            }
+        }
+    }
+    // Caso o nome não seja encontrado, retorna NULL
+    return NULL;
+}
+
+const char* getPrev(const char* nomePorta) {
+    for (int i = totalPortas-1; i >= 0; i--) {
+        if (strcmp(portas[i], nomePorta) == 0) {
+            // Se for a última porta, retorna a primeira
+            if (i == 0) {
+                return portas[totalPortas-1];
+            } else {
+                // Senão, retorna a anterior porta
+                return portas[i - 1];
+            }
+        }
+    }
+    // Caso o nome não seja encontrado, retorna NULL
+    return NULL;
+}
+
+
+ScreenLearningGate::~ScreenLearningGate(){
+  delete currentGate;
+  //delete evNext; //goback limpa os eventos
+  //delete previousGateName;
+  //delete currentGateName;
+}
+void ScreenLearningGate::drawGate(char* gateName, double x, double y, double size){
+  previousGateName = currentGateName;
+  currentGateName = gateName;
+  //clear previous gate space
+  if (currentGate != nullptr) {
+    SCtrl::tft.fillRect(
+      currentGate->x-DEFAULT_GATE_MAX_INPUT_RADIUS,
+      containerY + 1,//currentGate->y-currentGate->size-currentGate->connectorSize,
+      currentGate->width+DEFAULT_GATE_MAX_INPUT_RADIUS*2,
+      containerY + containerHeight - 30, //currentGate->size+2*currentGate->connectorSize
+      DEFAULT_BACKGROUND_COLOR
+    );
+    delete currentGate;
+    //currentGate = nullptr;
+
+    //clear gate name
+    SCtrl::tft.fillRect(
+      containerX+5,
+      containerY+5,
+      50,
+      20,
+      DEFAULT_BACKGROUND_COLOR
+    );
+  }
+
+  SCtrl::tft.setCursor(containerX+5,containerY+5);
+  SCtrl::tft.setTextSize(2);
+  SCtrl::tft.setTextColor(DEFAULT_TEXT_COLOR);
+  SCtrl::tft.print(gateName);
+
+  currentGate = createGateByName(gateName,x,y,size);
+  if (currentGate != nullptr) {
+    currentGate->hasInputs = true;
+    currentGate->draw();
+  }
+
+  if (gateName != portas[0]) {
 
   }
+
+
+  if (currentGateName != portas[totalPortas-1]) {
+    if (currentGateName == portas[0]) {
+      if (evPrev != nullptr) {
+        //delete evPrev;
+        //evPrev = nullptr;
+        evPrev->enabled = false;
+      }
+      SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,35,4,DEFAULT_BACKGROUND_COLOR,DEFAULT_BACKGROUND_COLOR,-1);  
+    }
+    if (evNext == nullptr) {
+      evNext = new EVRcpt(containerX+containerWidth-50,containerY + containerHeight /2,30);    
+      auto f = [this,x,y,size](){
+        this->drawNextGate(x,y,size);
+      };
+      evNext->onClickCallback = new LambdaCallback<decltype(f)>(f);
+      SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
+    } else {
+      evNext->enabled = true;
+    }
+  } 
+  if (currentGateName != portas[0]) {
+    if (currentGateName == portas[totalPortas-1]) {
+      if (evNext != nullptr) {
+        /*delete evNext;
+        evNext = nullptr;*/
+        evNext->enabled = false;
+      }
+      SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,35,4,DEFAULT_BACKGROUND_COLOR,DEFAULT_BACKGROUND_COLOR);
+    }
+    if (evPrev == nullptr) {
+      evPrev = new EVRcpt(containerX+50,containerY + containerHeight /2,30);    
+      auto f = [this,x,y,size](){
+        this->drawPrevGate(x,y,size);
+      };
+      evPrev->onClickCallback = new LambdaCallback<decltype(f)>(f);
+      SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW,-1);  
+    } else {
+      evPrev->enabled = true;
+    }       
+  } 
+}
+
+void ScreenLearningGate::drawNextGate(double x, double y, double size){
+  drawGate(getNext(currentGateName),x,y,size);
+}
+
+void ScreenLearningGate::drawPrevGate(double x, double y, double size){
+  drawGate(getPrev(currentGateName),x,y,size);
+}
+
+void ScreenLearningGate::draw(char* params[]){
+  Serial.println("INIT ScreenLearningGate::draw");
+  BaseScreen::draw(params);    
+  if (params != nullptr) {    
+    Gate* g = nullptr;
+    double gateSize = containerHeight * 0.4;
+    double gateWidth = gateSize * DEFAULT_GATE_ASPECT_RATIO;
+    double gateX = containerX + containerWidth / 2 - gateWidth / 2;//SCtrl::tft.width() / 2 - gateWidth / 2;
+    double gateY = containerY + containerHeight - containerHeight * DEFAULT_GATE_CONNECTOR_SIZE_PERC;//SCtrl::tft.height() - 75;
+    drawGate(params[0],gateX,gateY,gateSize);   
+  }  
 };

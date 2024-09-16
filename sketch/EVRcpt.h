@@ -5,6 +5,7 @@
 #include "BaseScreen.h"
 
 
+
 class ICallback {
   public:
     virtual void call() = 0; // Função virtual pura
@@ -27,25 +28,30 @@ class EVRcpt;//forward declaration
 extern EVRcpt* lastEVRcpt;
 
 //para instanciar elementos desenhados em tela que precisam receber eventos de toque (clique)
-class EVRcpt {
-  public: 
-    double x;
-    double y;
-    double distance;
-    void (*staticOnClick)() = nullptr;
-    ICallback* onClickCallback = nullptr;  // Ponteiro para o callback
+struct EVRcpt {
+  //public: 
+  int id = -1;
+  double x;
+  double y;
+  double distance;
+  bool enabled = true;
+  void (*staticOnClick)() = nullptr;
+  ICallback* onClickCallback = nullptr;  // Ponteiro para o callback
 
-    EVRcpt(
-      double pX,
-      double pY,
-      double pDist,
-      void (*pStaticOnClick)() = nullptr,
-      ICallback* pOnClickCallback = nullptr
-    );  
+  EVRcpt(
+    double pX,
+    double pY,
+    double pDist,
+    void (*pStaticOnClick)() = nullptr,
+    ICallback* pOnClickCallback = nullptr
+  );  
 
-    //checa se o elemento foi clicado, basedo nos parametros do construtor, sendo um ponto central e um raio
-    bool checkClickEvent(DPoint point);
-    EVRcpt* prev;
+  ~EVRcpt();
+
+  //checa se o elemento foi clicado, basedo nos parametros do construtor, sendo um ponto central e um raio
+  bool checkClickEvent(DPoint point);
+  EVRcpt* prev = nullptr;
+  EVRcpt* next = nullptr;
 };
 
 void clearAllEVRcpts();

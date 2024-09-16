@@ -57,6 +57,7 @@ struct GateInput {
     Gate* pGate = nullptr,
     bool pClickable = true
   );
+  ~GateInput();
   void initState(bool pInitState = false);
   void setState(bool newState);
   void draw();

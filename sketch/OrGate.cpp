@@ -94,13 +94,16 @@ void OrGate::drawBody(bool drawConnectors) {
       if (lineWidth > 1) {
         connMargin = connMargin - lineWidth / 2;
       }
-      for(int i = 0; i <= connectorCount / 2; i++) {        
+      for(int i = 0; i < connectorCount * 1.0 / 2; i++) {      
+        Serial.println("passing "+String(i) + " " + String(connectorCount) + " " + String(connectorCount / 2)+" " + boolToString((i+1)>connectorCount/2));  
         connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
         double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.x-(x+connMargin)); 
         double newPos = baseArc.y-newConnectorSize;
         newConnectorSize = newConnectorSize - (baseArc.y - (y + connectorSize));
         drawConnector(i,newPos, newConnectorSize);
+        if ((i+1)>connectorCount*1.0/2) break;
         drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
+        Serial.println("passinged "+String(i));
       }
     }
 
@@ -142,12 +145,13 @@ void OrGate::drawBody(bool drawConnectors) {
       if (lineWidth > 1) {
         connMargin = connMargin - lineWidth / 2;
       }
-      for(int i = 0; i <= connectorCount / 2; i++) {        
+      for(int i = 0; i < connectorCount ; i++) {        
         connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
         double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.y-(y+connMargin)); 
         double newPos = baseArc.x+newConnectorSize;
         newConnectorSize = newConnectorSize - (x - baseArc.x - connectorSize);
         drawConnector(i,newPos, newConnectorSize);
+        if (i > connectorCount / 2)  break;
         drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
       }
     }

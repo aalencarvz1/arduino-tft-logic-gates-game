@@ -25,6 +25,12 @@ GateInput::GateInput(
   initState(pOn);
 };
 
+GateInput::~GateInput() {
+  if (ev != nullptr) {
+    delete ev;
+  }
+}
+
 void GateInput::initState(bool pInitState) {
   this->on = pInitState;
   if (clickable) {
@@ -281,6 +287,9 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
       if (inputs == nullptr) {
         setConnectorCount(connectorCount);
       }
+      /*if (inputs[position] != nullptr) {
+        delete inputs[position];
+      }*/
       inputs[position] = new GateInput(
         position,
         x + connMargin,
@@ -289,7 +298,7 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
         false,
         this
       );
-      Serial.println("nnnn"+position);
+      Serial.println("nnnn"+String(position));
       inputs[position]->draw();
       //inputs[position] = input;
     }
@@ -305,11 +314,14 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
     } else {
       SCtrl::tft.drawLine(startPos, y + connMargin,startPos - pConnectorSize,y + connMargin, lineColor);
     }
-
+    
     if (hasInputs == true) {
       if (inputs == nullptr) {
         setConnectorCount(connectorCount);
       }
+      /*if (inputs[position] != nullptr) {
+        delete inputs[position];
+      }*/
       inputs[position] = new GateInput(
         position,
         startPos-pConnectorSize,
@@ -345,6 +357,9 @@ void Gate::drawOutputConnector() {
       if (inputs == nullptr) {
         setConnectorCount(connectorCount);
       }
+      /*if (inputs[connectorCount] != nullptr) {
+        delete inputs[connectorCount];
+      }*/
       inputs[connectorCount] = new GateInput(
         connectorCount,
         x + (width / 2 ),
@@ -376,6 +391,9 @@ void Gate::drawOutputConnector() {
       if (inputs == nullptr) {
         setConnectorCount(connectorCount);
       }
+      /*if (inputs[connectorCount] != nullptr) {
+        delete inputs[connectorCount];
+      }*/
       inputs[connectorCount] = new GateInput(
         connectorCount,
         x + size + connectorSize,
