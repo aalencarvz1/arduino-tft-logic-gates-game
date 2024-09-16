@@ -1,6 +1,6 @@
 #include "SCtrl.h"
 #include "EVRcpt.h"
-#include "AndGate.h"
+#include "OrGate.h"
 #include "Screens.h"
 #include "ScreenInitialMenu.h"
 #include "ScreenLearning.h"
@@ -16,10 +16,10 @@ void setup() {
   Screens::goTo(ScreenInitialMenu::SCREEN_ID);
   //Screens::goTo(ScreenLearning::SCREEN_ID);
   //Screens::goTo(ScreenPort::SCREEN_ID);
-  /*AndGate* g = new AndGate(
+  /*OrGate* g = new OrGate(
     50.0, 
     250.0,
-    30,//DEFAULT_GATE_SIZE,
+    DEFAULT_GATE_SIZE,
     DEFAULT_GATE_CONNECTOR_COUNT,	
     DEFAULT_GATE_VERTICAL_DIRECTION,
     DEFAULT_GATE_LINE_COLOR,
@@ -55,12 +55,12 @@ void loop() {
     Serial.println("clicked on " + String(p.x) + "," + String(p.y) + " > " +String(uiP.x) + "," + String(uiP.y) + " " + String(inClick));
 
     //loop troght event receptors array, checking if is point in area of element
-    EVRcpt* EVRcptTemp = lastEVRcpt;
-    while(EVRcptTemp != nullptr) {
-      if (EVRcptTemp->checkClickEvent(uiP) == true) {
+    EVRcpt* evTemp = lastEVRcpt;
+    while(evTemp != nullptr) {
+      if (evTemp->checkClickEvent(uiP) == true) {
         break;//not bubble event
       }
-      EVRcptTemp = EVRcptTemp->prev;
+      evTemp = evTemp->prev;
     }
     inClick = false;
   }  

@@ -47,6 +47,38 @@ TextInfo SCtrl::drawCenteredText(char* text, double y, double centerX, double te
     return result;
 };
 
+static void SCtrl::drawRoundedPlay(double cx,double cy,double radius,double round,int backgroundColor,int color,double multiplier) {
+  double angulo1 = 0;  // Vértice apontando para a direita (ponta do play)
+  double angulo2 = 2 * M_PI / 3;  // 120 graus (em radianos)
+  double angulo3 = 4 * M_PI / 3;  // 240 graus (em radianos)
+
+  //define os pontos do triangulo do play
+  // Coordenadas dos três vértices (p1, p2, p3)
+  double x1 = cx + radius * cos(angulo1) * multiplier;
+  double y1 = cy + radius * sin(angulo1) * multiplier;
+  
+  double x2 = cx + radius * cos(angulo2) * multiplier;
+  double y2 = cy + radius * sin(angulo2) * multiplier;
+  
+  double x3 = cx + radius * cos(angulo3) * multiplier;
+  double y3 = cy + radius * sin(angulo3) * multiplier;
+  
+
+  //desenha o play
+  SCtrl::tft.fillTriangle(x1,y1, x2,y2, x3,y3 , color);
+  if (round > 0) {
+    //desenha os cantos arredondados
+    SCtrl::tft.fillCircle(x1,y1,round*1.5, backgroundColor);
+    SCtrl::tft.fillCircle(x1-round*1.75*multiplier,y1,round, color);
+    SCtrl::tft.fillCircle(x2,y2,round*1.5, backgroundColor);
+    SCtrl::tft.fillCircle(x2+round*multiplier,y2-round*1.75*multiplier,round, color);
+    SCtrl::tft.fillCircle(x3,y3,round*1.5, backgroundColor);
+    SCtrl::tft.fillCircle(x3+round*multiplier,y3+round*1.75*multiplier,round, color);
+  }
+}
+
+
+
 
 static void SCtrl::drawRoundButton(double x,double y,double r,int color,char* text, bool hasCenterPlay, bool hasBorder, double textDistance = 20, void (*onClick)()) {
   if (hasBorder) {
