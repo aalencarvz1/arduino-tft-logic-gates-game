@@ -52,6 +52,12 @@ const char* getPrev(const char* nomePorta) {
 }
 
 
+ScreenLearningGate::ScreenLearningGate(char* pTitle, bool pHasBack) :
+  BaseScreen(pTitle,pHasBack)
+{
+  
+};
+
 ScreenLearningGate::~ScreenLearningGate(){
   delete currentGate;
   //delete evNext; //goback limpa os eventos
@@ -115,8 +121,9 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
       };
       evNext->onClickCallback = new LambdaCallback<decltype(f)>(f);
       SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
-    } else {
+    } else if (!evNext->enabled) {
       evNext->enabled = true;
+      SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
     }
   } 
   if (currentGateName != portas[0]) {
@@ -135,8 +142,9 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
       };
       evPrev->onClickCallback = new LambdaCallback<decltype(f)>(f);
       SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW,-1);  
-    } else {
+    } else if (!evPrev->enabled){
       evPrev->enabled = true;
+      SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW,-1);  
     }       
   } 
 }
