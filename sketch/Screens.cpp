@@ -7,6 +7,9 @@
 #include "ScreenLearning.h"
 #include "ScreenPort.h"
 #include "ScreenLearningGate.h"
+#include "ScreenPoints.h"
+#include "ScreenTime.h"
+#include "ScreenMake.h"
 
 
 
@@ -24,13 +27,19 @@ void Screens::goTo(byte screenId,char* params[]) {
 
   //find screen by id
   if (screenId == ScreenInitialMenu::SCREEN_ID) {
-    newScreen = new ScreenInitialMenu("PORTAS E CIRCUITOS",false);
+    newScreen = new ScreenInitialMenu("PORTAS LOGICAS",false);
   } else if (screenId == ScreenLearning::SCREEN_ID) {
-    newScreen = new ScreenLearning("MODO TUTORIAL");
+    newScreen = new ScreenLearning();
   } else if (screenId == ScreenPort::SCREEN_ID) {
-    newScreen = new ScreenPort("PORTAS");
+    newScreen = new ScreenPort();
   } else if (screenId == ScreenLearningGate::SCREEN_ID) {
-    newScreen = new ScreenLearningGate("MODO TUTORIAL");
+    newScreen = new ScreenLearningGate();
+  } else if (screenId == ScreenPoints::SCREEN_ID) {
+    newScreen = new ScreenPoints();
+  } else if (screenId == ScreenTime::SCREEN_ID) {
+    newScreen = new ScreenTime();
+  } else if (screenId == ScreenMake::SCREEN_ID) {
+    newScreen = new ScreenMake();
   };
 
   if (newScreen != nullptr) {    

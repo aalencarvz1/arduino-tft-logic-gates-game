@@ -11,6 +11,7 @@
 #include "Gates.h"
 
 
+
 void drawGateButton(
   double x,
   double y,
@@ -36,6 +37,13 @@ void drawGateButton(
     g = nullptr;
   }
 }
+
+
+ScreenLearning::ScreenLearning(char* pTitle, bool pHasBack) :
+  BaseScreen(pTitle,pHasBack)
+{
+  
+};
 
 void ScreenLearning::draw(char* params[]){
   BaseScreen::draw(params);

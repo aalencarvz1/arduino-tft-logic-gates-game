@@ -104,7 +104,11 @@ void drawRandomGate(Gate* g){
   }  
 };
 
-
+ScreenPort::ScreenPort(char* pTitle, bool pHasBack) :
+  BaseScreen(pTitle,pHasBack)
+{
+  
+};
 
 void ScreenPort::draw(char* params[]){
   BaseScreen::draw(params);

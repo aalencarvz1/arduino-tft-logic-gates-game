@@ -13,6 +13,7 @@ struct ScreenLearningGate : public BaseScreen{
   EVRcpt* evPrev = nullptr;
   char* previousGateName = nullptr;
   char* currentGateName = nullptr;
+  ScreenLearningGate(char* pTitle = "MODO TUTORIAL", bool pHasBack = true);
   ~ScreenLearningGate();
   void drawGate(char* gateName, double x, double y, double size);
   void drawPrevGate(double x, double y, double size);

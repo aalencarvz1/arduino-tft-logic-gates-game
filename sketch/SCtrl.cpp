@@ -69,7 +69,7 @@ static void SCtrl::drawRoundedPlay(double cx,double cy,double radius,double roun
   if (round > 0) {
     //desenha os cantos arredondados
     SCtrl::tft.fillCircle(x1,y1,round*1.5, backgroundColor);
-    SCtrl::tft.fillCircle(x1-round*1.75*multiplier,y1,round, color);
+    SCtrl::tft.fillCircle(x1-round*1.8*multiplier,y1,round, color);
     SCtrl::tft.fillCircle(x2,y2,round*1.5, backgroundColor);
     SCtrl::tft.fillCircle(x2+round*multiplier,y2-round*1.75*multiplier,round, color);
     SCtrl::tft.fillCircle(x3,y3,round*1.5, backgroundColor);
