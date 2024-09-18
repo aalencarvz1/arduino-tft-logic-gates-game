@@ -29,7 +29,7 @@ void drawGateButton(
     Screens::goTo(ScreenLearningGate::SCREEN_ID,params);
   };
   ev->onClickCallback = new LambdaCallback<decltype(f)>(f);
-  Gate* g = createGateByName(gateName,x+(col*(x*2.0))-(r*0.35),y+hSupSpace+(lin*(y*2.0))+(r*0.35),r*0.7);    
+  Gate* g = Gates::createGateByName(gateName,x+(col*(x*2.0))-(r*0.35),y+hSupSpace+(lin*(y*2.0))+(r*0.35),r*0.7);    
   if (g != nullptr) {
     g->lineColor = TFT_WHITE;//TFT_BLACK;//TFT_LIGHTGREY;
     g->draw();
