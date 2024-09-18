@@ -1,3 +1,4 @@
+#include "Gates.h"
 #include "Utils.h"
 #include "Gate.h"
 #include "AndGate.h"
@@ -8,7 +9,44 @@
 #include "XorGate.h"
 #include "XnorGate.h"
 
-Gate* createGateByName(
+
+static char* Gates::portas[] = {"AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"};
+static int Gates::totalPortas = sizeof(Gates::portas) / sizeof(Gates::portas[0]);
+
+// Função para encontrar a próxima porta no array
+static char* Gates::getNext(const char* nomePorta) {
+    for (int i = 0; i < totalPortas; i++) {
+        if (strcmp(portas[i], nomePorta) == 0) {
+            // Se for a última porta, retorna a primeira
+            if (i == totalPortas - 1) {
+                return portas[0];
+            } else {
+                // Senão, retorna a próxima porta
+                return portas[i + 1];
+            }
+        }
+    }
+    // Caso o nome não seja encontrado, retorna NULL
+    return NULL;
+}
+
+static char* Gates::getPrev(const char* nomePorta) {
+    for (int i = totalPortas-1; i >= 0; i--) {
+        if (strcmp(portas[i], nomePorta) == 0) {
+            // Se for a última porta, retorna a primeira
+            if (i == 0) {
+                return portas[totalPortas-1];
+            } else {
+                // Senão, retorna a anterior porta
+                return portas[i - 1];
+            }
+        }
+    }
+    // Caso o nome não seja encontrado, retorna NULL
+    return NULL;
+}
+
+static Gate* Gates::createGateByName(
   char* gateName,
   double pX                = 150.0, 
   double pY                = 250.0,

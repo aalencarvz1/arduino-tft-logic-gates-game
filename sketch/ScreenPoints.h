@@ -1,5 +1,5 @@
-#ifndef SCREENLPOINTS_H
-#define SCREENLPOINTS_H
+#ifndef SCREENPOINTS_H
+#define SCREENPOINTS_H
 
 #include <Arduino.h>
 #include "BaseScreen.h"
@@ -11,4 +11,4 @@ struct ScreenPoints : public BaseScreen{
   void draw(char* params[] = nullptr) override;
 };
 
-#endif // SCREENLPOINTS_H
+#endif // SCREENPOINTS_H

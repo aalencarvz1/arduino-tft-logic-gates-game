@@ -14,44 +14,6 @@
 #include "Gates.h"
 
 
-const char* portas[] = {"AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"};
-const int totalPortas = sizeof(portas) / sizeof(portas[0]);
-
-
-// Função para encontrar a próxima porta no array
-const char* getNext(const char* nomePorta) {
-    for (int i = 0; i < totalPortas; i++) {
-        if (strcmp(portas[i], nomePorta) == 0) {
-            // Se for a última porta, retorna a primeira
-            if (i == totalPortas - 1) {
-                return portas[0];
-            } else {
-                // Senão, retorna a próxima porta
-                return portas[i + 1];
-            }
-        }
-    }
-    // Caso o nome não seja encontrado, retorna NULL
-    return NULL;
-}
-
-const char* getPrev(const char* nomePorta) {
-    for (int i = totalPortas-1; i >= 0; i--) {
-        if (strcmp(portas[i], nomePorta) == 0) {
-            // Se for a última porta, retorna a primeira
-            if (i == 0) {
-                return portas[totalPortas-1];
-            } else {
-                // Senão, retorna a anterior porta
-                return portas[i - 1];
-            }
-        }
-    }
-    // Caso o nome não seja encontrado, retorna NULL
-    return NULL;
-}
-
-
 ScreenLearningGate::ScreenLearningGate(char* pTitle, bool pHasBack) :
   BaseScreen(pTitle,pHasBack)
 {
@@ -60,9 +22,6 @@ ScreenLearningGate::ScreenLearningGate(char* pTitle, bool pHasBack) :
 
 ScreenLearningGate::~ScreenLearningGate(){
   delete currentGate;
-  //delete evNext; //goback limpa os eventos
-  //delete previousGateName;
-  //delete currentGateName;
 }
 void ScreenLearningGate::drawGate(char* gateName, double x, double y, double size){
   previousGateName = currentGateName;
@@ -94,19 +53,19 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
   SCtrl::tft.setTextColor(DEFAULT_TEXT_COLOR);
   SCtrl::tft.print(gateName);
 
-  currentGate = createGateByName(gateName,x,y,size);
+  currentGate = Gates::createGateByName(gateName,x,y,size);
   if (currentGate != nullptr) {
     currentGate->hasInputs = true;
     currentGate->draw();
   }
 
-  if (gateName != portas[0]) {
+  if (gateName != Gates::portas[0]) {
 
   }
 
 
-  if (currentGateName != portas[totalPortas-1]) {
-    if (currentGateName == portas[0]) {
+  if (currentGateName != Gates::portas[Gates::totalPortas-1]) {
+    if (currentGateName == Gates::portas[0]) {
       if (evPrev != nullptr) {
         //delete evPrev;
         //evPrev = nullptr;
@@ -126,8 +85,8 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
       SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
     }
   } 
-  if (currentGateName != portas[0]) {
-    if (currentGateName == portas[totalPortas-1]) {
+  if (currentGateName != Gates::portas[0]) {
+    if (currentGateName == Gates::portas[Gates::totalPortas-1]) {
       if (evNext != nullptr) {
         /*delete evNext;
         evNext = nullptr;*/
@@ -150,11 +109,11 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
 }
 
 void ScreenLearningGate::drawNextGate(double x, double y, double size){
-  drawGate(getNext(currentGateName),x,y,size);
+  drawGate(Gates::getNext(currentGateName),x,y,size);
 }
 
 void ScreenLearningGate::drawPrevGate(double x, double y, double size){
-  drawGate(getPrev(currentGateName),x,y,size);
+  drawGate(Gates::getPrev(currentGateName),x,y,size);
 }
 
 void ScreenLearningGate::draw(char* params[]){

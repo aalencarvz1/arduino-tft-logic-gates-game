@@ -10,6 +10,7 @@
 #include "ScreenPoints.h"
 #include "ScreenTime.h"
 #include "ScreenMake.h"
+#include "ScreenPoints1.h"
 
 
 
@@ -40,6 +41,8 @@ void Screens::goTo(byte screenId,char* params[]) {
     newScreen = new ScreenTime();
   } else if (screenId == ScreenMake::SCREEN_ID) {
     newScreen = new ScreenMake();
+  } else if (screenId == ScreenPoints1::SCREEN_ID) {
+    newScreen = new ScreenPoints1();
   };
 
   if (newScreen != nullptr) {    

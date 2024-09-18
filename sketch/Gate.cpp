@@ -55,13 +55,11 @@ void GateInput::setState(bool newState) {
   on = newState;  
   if (redrawOnChange) draw();
   if (recalcOnChange) gate->calcOutputState();
-  Serial.println("zzzzzzz "+boolToString(gate->inputs[gate->connectorCount]->on));
-  if (redrawOnChange) gate->inputs[gate->connectorCount]->draw();
+  if (redrawOnChange && gate->visibleOutput) gate->inputs[gate->connectorCount]->draw();
 }
 
 void GateInput::draw() {
-  Serial.println("drawing input on "+String(x) + "," + String(y)+" " + boolToString(on));
-  SCtrl::drawRoundButton(x,y,r,(on == true) ? DEFAULT_GATE_INPUT_ON_COLOR : DEFAULT_GATE_INPUT_OFF_COLOR,nullptr,false,false,0);  
+  if (visible) SCtrl::drawRoundButton(x,y,r,(on == true) ? DEFAULT_GATE_INPUT_ON_COLOR : DEFAULT_GATE_INPUT_OFF_COLOR,nullptr,false,false,0);  
 };
 
 
@@ -369,6 +367,8 @@ void Gate::drawOutputConnector() {
         this,
         false 
       );
+      inputs[connectorCount]->isOutput = true;
+      inputs[connectorCount]->visible = visibleOutput;
       calcOutputState();
       inputs[connectorCount]->draw();
     }
@@ -403,6 +403,8 @@ void Gate::drawOutputConnector() {
         this,
         false 
       );
+      inputs[connectorCount]->isOutput = true;
+      inputs[connectorCount]->visible = visibleOutput;
       calcOutputState();
       inputs[connectorCount]->draw();
     }

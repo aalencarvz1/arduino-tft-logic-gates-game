@@ -44,9 +44,11 @@ struct GateInput {
   bool on = false;
   EVRcpt* ev = nullptr;
   Gate* gate = nullptr;
+  bool visible = true;
   bool clickable = true;
   bool redrawOnChange = true;
-  bool recalcOnChange = true;
+  bool recalcOnChange = true;  
+  bool isOutput = false;
   
   GateInput(
     int pId,
@@ -91,6 +93,7 @@ struct Gate {
   GateInput** inputs = nullptr;
 
   bool outputState = false;
+  bool visibleOutput = true;
 
 
   Gate(
