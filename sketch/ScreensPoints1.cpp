@@ -31,9 +31,9 @@ void ScreenPoints1::drawGate(char* gateName, double x, double y, double size){
   if (currentGate != nullptr) {
     SCtrl::tft.fillRect(
       currentGate->x-DEFAULT_GATE_MAX_INPUT_RADIUS,
-      containerY + 1,//currentGate->y-currentGate->size-currentGate->connectorSize,
+      containerY +  25,//currentGate->y-currentGate->size-currentGate->connectorSize,
       currentGate->width+DEFAULT_GATE_MAX_INPUT_RADIUS*2,
-      containerY + containerHeight - 30, //currentGate->size+2*currentGate->connectorSize
+      containerY + containerHeight - 55, //currentGate->size+2*currentGate->connectorSize
       DEFAULT_BACKGROUND_COLOR
     );
     delete currentGate;
@@ -43,16 +43,19 @@ void ScreenPoints1::drawGate(char* gateName, double x, double y, double size){
     SCtrl::tft.fillRect(
       containerX+5,
       containerY+5,
-      50,
+      100,
       20,
       DEFAULT_BACKGROUND_COLOR
     );
   }
+  
+  drawResult(false,resultX,resultY,resultSize,true);
 
-  /*SCtrl::tft.setCursor(containerX+5,containerY+5);
+  SCtrl::tft.setCursor(containerX+5,containerY+5);
   SCtrl::tft.setTextSize(2);
   SCtrl::tft.setTextColor(DEFAULT_TEXT_COLOR);
-  SCtrl::tft.print(gateName);*/
+  SCtrl::tft.print("Fase " + String(currentLevel));
+  drawResult(false,resultX,resultY,resultSize,true);
 
   currentGate = Gates::createGateByName(gateName,x,y,size);
   if (currentGate != nullptr) {
@@ -65,55 +68,29 @@ void ScreenPoints1::drawGate(char* gateName, double x, double y, double size){
 
   }
 
-
-  /*if (currentGateName != Gates::portas[Gates::totalPortas-1]) {
-    if (currentGateName == Gates::portas[0]) {
-      if (evPrev != nullptr) {
-        //delete evPrev;
-        //evPrev = nullptr;
-        evPrev->enabled = false;
-      }
-      SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,35,4,DEFAULT_BACKGROUND_COLOR,DEFAULT_BACKGROUND_COLOR,-1);  
-    }
-    if (evNext == nullptr) {
-      evNext = new EVRcpt(containerX+containerWidth-50,containerY + containerHeight /2,30);    
-      auto f = [this,x,y,size](){
-        this->drawNextGate(x,y,size);
-      };
-      evNext->onClickCallback = new LambdaCallback<decltype(f)>(f);
-      SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
-    } else if (!evNext->enabled) {
-      evNext->enabled = true;
-      SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
-    }
-  } 
-  if (currentGateName != Gates::portas[0]) {
-    if (currentGateName == Gates::portas[Gates::totalPortas-1]) {
-      if (evNext != nullptr) {
-        evNext->enabled = false;
-      }
-      SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,35,4,DEFAULT_BACKGROUND_COLOR,DEFAULT_BACKGROUND_COLOR);
-    }
-    if (evPrev == nullptr) {
-      evPrev = new EVRcpt(containerX+50,containerY + containerHeight /2,30);    
-      auto f = [this,x,y,size](){
-        this->drawPrevGate(x,y,size);
-      };
-      evPrev->onClickCallback = new LambdaCallback<decltype(f)>(f);
-      SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW,-1);  
-    } else if (!evPrev->enabled){
-      evPrev->enabled = true;
-      SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW,-1);  
-    }       
-  } */
 }
 
-void ScreenPoints1::drawNextGate(double x, double y, double size){
-  drawGate(Gates::getNext(currentGateName),x,y,size);
+void ScreenPoints1::drawNextLevel(double x, double y, double size){
+  SCtrl::drawCenteredText("Ative a porta",containerY+10);
+  drawGate(currentLevel > 1 ? Gates::getNext(currentGateName) : Gates::portas[0],x,y,size);
 }
 
-void ScreenPoints1::drawPrevGate(double x, double y, double size){
-  drawGate(Gates::getPrev(currentGateName),x,y,size);
+void ScreenPoints1::drawResult(bool isCorrect, double centerX, double centerY, double size, bool onlyClean) {
+  int halfSize = size / 2;
+
+  // Limpa a área onde o símbolo será desenhado
+  SCtrl::tft.fillRect(centerX - halfSize - 2, centerY - halfSize - 2, size + 4, size + 4, DEFAULT_BACKGROUND_COLOR);
+  if (!onlyClean) {
+    if (isCorrect) {
+      // Desenha o símbolo de check verde
+      SCtrl::tft.drawLine(centerX - halfSize, centerY, centerX - halfSize / 2, centerY + halfSize, TFT_GREEN);
+      SCtrl::tft.drawLine(centerX - halfSize / 2, centerY + halfSize, centerX + halfSize, centerY - halfSize, TFT_GREEN);
+    } else {
+      // Desenha o símbolo de X vermelho
+      SCtrl::tft.drawLine(centerX - halfSize, centerY - halfSize, centerX + halfSize, centerY + halfSize, TFT_RED);
+      SCtrl::tft.drawLine(centerX + halfSize, centerY - halfSize, centerX - halfSize, centerY + halfSize, TFT_RED);
+    }
+  }
 }
 
 void ScreenPoints1::confirm(){
@@ -123,6 +100,10 @@ void ScreenPoints1::confirm(){
     currentPontuation++;
     pontuationCurrentPontuation();
   }
+  drawResult(currentGate->outputState,resultX,resultY,resultSize);
+  delay(2000);
+  currentLevel++;
+  drawNextLevel(gateX,gateY,gateSize); 
 }
 
 void ScreenPoints1::drawConfirmButton(){
@@ -156,16 +137,22 @@ void ScreenPoints1::pontuationCurrentPontuation(){
 
 void ScreenPoints1::draw(char* params[]){
   Serial.println("INIT ScreenPoints1::draw");
-  BaseScreen::draw(params);    
+  BaseScreen::draw(params); 
+  gateSize = containerHeight * 0.4;
+  gateWidth = gateSize * DEFAULT_GATE_ASPECT_RATIO;
+  gateX = containerX + containerWidth / 2 - gateWidth / 2;//SCtrl::tft.width() / 2 - gateWidth / 2;
+  gateY = containerY + containerHeight - containerHeight * DEFAULT_GATE_CONNECTOR_SIZE_PERC + 15;//SCtrl::tft.height() - 75;   
+
+  resultX = containerX+containerWidth-100;
+  resultY = containerY+containerHeight/2;
+  resultSize = 50;
+
   if (params != nullptr) {    
     Gate* g = nullptr;
-    double gateSize = containerHeight * 0.4;
-    double gateWidth = gateSize * DEFAULT_GATE_ASPECT_RATIO;
-    double gateX = containerX + containerWidth / 2 - gateWidth / 2;//SCtrl::tft.width() / 2 - gateWidth / 2;
-    double gateY = containerY + containerHeight - containerHeight * DEFAULT_GATE_CONNECTOR_SIZE_PERC;//SCtrl::tft.height() - 75;
     drawConfirmButton();
     pontuationTitle();
     pontuationCurrentPontuation();
-    drawGate(params[0],gateX,gateY,gateSize);   
+    //drawGate(params[0],gateX,gateY,gateSize);   
+    drawNextLevel(gateX,gateY,gateSize);
   }  
 };
