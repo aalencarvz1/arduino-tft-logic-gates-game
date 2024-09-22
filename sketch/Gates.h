@@ -4,10 +4,10 @@
 #include "Gate.h"
 
 struct Gates{
-  static char* portas[];
-  static int totalPortas;
-  static char* getNext(const char* nomePorta);
-  static char* getPrev(const char* nomePorta);
+  static char* gateNames[];
+  static int gateNamesCount;
+  static char* getNext(const char* gateName);
+  static char* getPrev(const char* gateName);
 
   static Gate* createGateByName(
     char* gateName,

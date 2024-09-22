@@ -1,10 +1,11 @@
 #include "SCtrl.h"
 #include "EVRcpt.h"
-#include "OrGate.h"
+#include "XnorGate.h"
 #include "Screens.h"
 #include "ScreenInitialMenu.h"
 #include "ScreenLearning.h"
 #include "ScreenPort.h"
+#include "ScreenPoints1.h"
 
 bool inClick = false; //AVOID LOOP ON DISPATH MULTIPLE CLICKS AT SOME TIME
 
@@ -13,15 +14,16 @@ void setup() {
   Serial.begin(9600);
   SCtrl::init(); 
   SCtrl::tft.fillScreen(TFT_BLACK);
-  Screens::goTo(ScreenInitialMenu::SCREEN_ID);
+  //Screens::goTo(ScreenInitialMenu::SCREEN_ID);
   //Screens::goTo(ScreenLearning::SCREEN_ID);
   //Screens::goTo(ScreenPort::SCREEN_ID);
-  /*OrGate* g = new OrGate(
-    50.0, 
-    250.0,
+  Screens::goTo(ScreenPoints1::SCREEN_ID);
+  /*XnorGate* g = new XnorGate(
+    100.0, 
+    50.0,
     DEFAULT_GATE_SIZE,
-    DEFAULT_GATE_CONNECTOR_COUNT,	
-    DEFAULT_GATE_VERTICAL_DIRECTION,
+    3,//DEFAULT_GATE_CONNECTOR_COUNT,	
+    false,//DEFAULT_GATE_VERTICAL_DIRECTION,
     DEFAULT_GATE_LINE_COLOR,
     DEFAULT_GATE_LINE_WIDTH,
     DEFAULT_GATE_ASPECT_RATIO,

@@ -20,8 +20,6 @@ struct XorGate : public OrGate {
     double pWidth            = DEFAULT_GATE_WIDTH,
     double pConnectorMargin  = DEFAULT_GATE_CONNECTOR_MARGIN
   );
-
-  bool calcOutputState() override;
 };
 
 #endif //XORGATE_H

@@ -66,9 +66,10 @@ bool AndGate::calcOutputState(){
       bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
       inputs[connectorCount]->recalcOnChange = false; 
       inputs[connectorCount]->setState(outputState); 
-      inputs[connectorCount]->recalcOnChange = prevRecalcState;
+      inputs[connectorCount]->recalcOnChange = prevRecalcState;      
     };
   };
+  afterCalcOutputState();
   Serial.println("calculated gate output:" + boolToString(outputState));
   return outputState;
 };

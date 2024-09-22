@@ -10,19 +10,19 @@
 #include "XnorGate.h"
 
 
-static char* Gates::portas[] = {"AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"};
-static int Gates::totalPortas = sizeof(Gates::portas) / sizeof(Gates::portas[0]);
+static char* Gates::gateNames[] = {"AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"};
+static int Gates::gateNamesCount = sizeof(Gates::gateNames) / sizeof(Gates::gateNames[0]);
 
 // Função para encontrar a próxima porta no array
-static char* Gates::getNext(const char* nomePorta) {
-    for (int i = 0; i < totalPortas; i++) {
-        if (strcmp(portas[i], nomePorta) == 0) {
+static char* Gates::getNext(const char* gateName) {
+    for (int i = 0; i < gateNamesCount; i++) {
+        if (strcmp(gateNames[i], gateName) == 0) {
             // Se for a última porta, retorna a primeira
-            if (i == totalPortas - 1) {
-                return portas[0];
+            if (i == gateNamesCount - 1) {
+                return gateNames[0];
             } else {
                 // Senão, retorna a próxima porta
-                return portas[i + 1];
+                return gateNames[i + 1];
             }
         }
     }
@@ -30,15 +30,15 @@ static char* Gates::getNext(const char* nomePorta) {
     return NULL;
 }
 
-static char* Gates::getPrev(const char* nomePorta) {
-    for (int i = totalPortas-1; i >= 0; i--) {
-        if (strcmp(portas[i], nomePorta) == 0) {
+static char* Gates::getPrev(const char* gateName) {
+    for (int i = gateNamesCount-1; i >= 0; i--) {
+        if (strcmp(gateNames[i], gateName) == 0) {
             // Se for a última porta, retorna a primeira
             if (i == 0) {
-                return portas[totalPortas-1];
+                return gateNames[gateNamesCount-1];
             } else {
                 // Senão, retorna a anterior porta
-                return portas[i - 1];
+                return gateNames[i - 1];
             }
         }
     }
@@ -48,18 +48,18 @@ static char* Gates::getPrev(const char* nomePorta) {
 
 static Gate* Gates::createGateByName(
   char* gateName,
-  double pX                = 150.0, 
-  double pY                = 250.0,
-  double pSize             = DEFAULT_GATE_SIZE,
-  int pConnectorCount      = DEFAULT_GATE_CONNECTOR_COUNT,	
-  bool pVertical           = DEFAULT_GATE_VERTICAL_DIRECTION,
-  int pLineColor           = DEFAULT_GATE_LINE_COLOR,
-  double pLineWidth        = DEFAULT_GATE_LINE_WIDTH,
-  double pAspectRatio      = DEFAULT_GATE_ASPECT_RATIO,
-  double pBaseSizePerc     = DEFAULT_GATE_BASE_SIZE_PERC,
-  double pConnectorSize    = DEFAULT_GATE_CONNECTOR_SIZE,
-  double pWidth            = DEFAULT_GATE_WIDTH,
-  double pConnectorMargin  = DEFAULT_GATE_CONNECTOR_MARGIN
+  double pX, 
+  double pY,
+  double pSize,
+  int pConnectorCount,	
+  bool pVertical,
+  int pLineColor,
+  double pLineWidth,
+  double pAspectRatio,
+  double pBaseSizePerc,
+  double pConnectorSize,
+  double pWidth,
+  double pConnectorMargin
 ) {
   Gate* result = nullptr;
   toUpperCase(gateName);

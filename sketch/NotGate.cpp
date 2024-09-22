@@ -68,6 +68,7 @@ bool NotGate::calcOutputState(){
       inputs[connectorCount]->recalcOnChange = prevRecalcState;
     };
   };
+  afterCalcOutputState();
   Serial.println("calculated gate output:" + boolToString(outputState));
   return outputState;
 };

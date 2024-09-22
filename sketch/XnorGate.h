@@ -1,9 +1,9 @@
 #ifndef XNORGATE_H
 #define XNORGATE_H
 
-#include "OrGate.h"
+#include "XorGate.h"
 
-struct XnorGate : public OrGate {
+struct XnorGate : public XorGate {
 
   //construtor com parametros tem que reser implementado também nas classes derivadas
   XnorGate(
@@ -20,8 +20,6 @@ struct XnorGate : public OrGate {
     double pWidth            = DEFAULT_GATE_WIDTH,
     double pConnectorMargin  = DEFAULT_GATE_CONNECTOR_MARGIN
   );
-
-  bool calcOutputState() override;
 };
 
 #endif //XNORGATE_H

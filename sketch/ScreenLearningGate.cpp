@@ -55,17 +55,17 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
 
   currentGate = Gates::createGateByName(gateName,x,y,size);
   if (currentGate != nullptr) {
-    currentGate->hasInputs = true;
+    currentGate->setHasInputs(true);
     currentGate->draw();
   }
 
-  if (gateName != Gates::portas[0]) {
+  if (gateName != Gates::gateNames[0]) {
 
   }
 
 
-  if (currentGateName != Gates::portas[Gates::totalPortas-1]) {
-    if (currentGateName == Gates::portas[0]) {
+  if (currentGateName != Gates::gateNames[Gates::gateNamesCount-1]) {
+    if (currentGateName == Gates::gateNames[0]) {
       if (evPrev != nullptr) {
         //delete evPrev;
         //evPrev = nullptr;
@@ -85,8 +85,8 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
       SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW);
     }
   } 
-  if (currentGateName != Gates::portas[0]) {
-    if (currentGateName == Gates::portas[Gates::totalPortas-1]) {
+  if (currentGateName != Gates::gateNames[0]) {
+    if (currentGateName == Gates::gateNames[Gates::gateNamesCount-1]) {
       if (evNext != nullptr) {
         /*delete evNext;
         evNext = nullptr;*/

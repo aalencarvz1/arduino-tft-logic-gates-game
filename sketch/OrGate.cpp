@@ -23,6 +23,8 @@ OrGate::OrGate(
     baseSizePerc = DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC;
   } else if (pBaseSizePerc > DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC) {
     baseSizePerc = DEFAULT_GATE_MAX_OR_BASE_SIZE_PERC;
+  } else if (pBaseSizePerc == DEFAULT_GATE_BASE_SIZE_PERC) {
+    baseSizePerc = DEFAULT_GATE_MIN_OR_BASE_SIZE_PERC;
   }
 };
 
@@ -95,7 +97,6 @@ void OrGate::drawBody(bool drawConnectors) {
         connMargin = connMargin - lineWidth / 2;
       }
       for(int i = 0; i < connectorCount * 1.0 / 2; i++) {      
-        Serial.println("passing "+String(i) + " " + String(connectorCount) + " " + String(connectorCount / 2)+" " + boolToString((i+1)>connectorCount/2));  
         connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
         double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.x-(x+connMargin)); 
         double newPos = baseArc.y-newConnectorSize;
@@ -103,7 +104,6 @@ void OrGate::drawBody(bool drawConnectors) {
         drawConnector(i,newPos, newConnectorSize);
         if ((i+1)>connectorCount*1.0/2) break;
         drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
-        Serial.println("passinged "+String(i));
       }
     }
 
@@ -111,7 +111,6 @@ void OrGate::drawBody(bool drawConnectors) {
     double arcHeight2 = sqrt(pow((x+(width/2.0)) - x, 2.0) + pow((y-size+arcHeight-baseAdjust) - (y-size-baseAdjust), 2.0));  // Distância entre P1 e P2 (lado a)
     arcHeight2 = arcHeight2 / 15; //divide o circulo em 15 partes, 
     for (int i = 0; i < lineWidth ; i++) {
-      Serial.println("x1="+String(x+(width/2.0)-i)+",y1="+String(y-size-baseAdjust)+"x2="+String(x+width-i)+",y2="+String(y-size+arcHeight-baseAdjust));
       SCtrl::drawArcFromArrow(x+i,y-size+arcHeight-baseAdjust,x+(width/2.0)-i,y-size-baseAdjust,arcHeight2-i,lineColor);
       SCtrl::drawArcFromArrow(x+(width/2.0)-i,y-size-baseAdjust,x+width-i,y-size+arcHeight-baseAdjust,arcHeight2-i,lineColor);
     }
@@ -133,10 +132,10 @@ void OrGate::drawBody(bool drawConnectors) {
     //draw laterals
     if (lineWidth > 1) {
       SCtrl::tft.fillRect(x,y,size-arcHeight+baseAdjust,lineWidth,lineColor); //left line
-      SCtrl::tft.fillRect(x,y+width-lineWidth,size-arcHeight+baseAdjust,lineWidth,lineColor); //rigth line
+      SCtrl::tft.fillRect(x,y+width-lineWidth,size-arcHeight+baseAdjust,y+width+lineWidth,lineColor); //rigth line
     } else {
       SCtrl::tft.drawLine(x,y,x+size-arcHeight+baseAdjust,y,lineColor); //left line
-      SCtrl::tft.drawLine(x,y+width,x+size-arcHeight+baseAdjust,y,lineColor); //rigth line
+      SCtrl::tft.drawLine(x,y+width,x+size-arcHeight+baseAdjust,y+width,lineColor); //rigth line
     }
 
     //draw conectors
@@ -145,14 +144,23 @@ void OrGate::drawBody(bool drawConnectors) {
       if (lineWidth > 1) {
         connMargin = connMargin - lineWidth / 2;
       }
-      for(int i = 0; i < connectorCount ; i++) {        
+      //for(int i = 0; i < connectorCount ; i++) {  
+      for(int i = 0; i < connectorCount * 1.0 / 2; i++) {         
         connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
         double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.y-(y+connMargin)); 
         double newPos = baseArc.x+newConnectorSize;
         newConnectorSize = newConnectorSize - (x - baseArc.x - connectorSize);
         drawConnector(i,newPos, newConnectorSize);
-        if (i > connectorCount / 2)  break;
+        if ((i+1)>connectorCount*1.0/2) break;
         drawConnector(connectorCount-(i+1),newPos, newConnectorSize);
+
+        /*connMargin = connMargin + (i * (width - (connMargin * 2)) / (connectorCount - 1));
+        double newConnectorSize = getCatetoFromPitagoras(baseArc.r,baseArc.x-(x+connMargin)); 
+        double newPos = baseArc.y-newConnectorSize;
+        newConnectorSize = newConnectorSize - (baseArc.y - (y + connectorSize));
+        drawConnector(i,newPos, newConnectorSize);
+        if ((i+1)>connectorCount*1.0/2) break;
+        drawConnector(connectorCount-(i+1),newPos, newConnectorSize);*/
       }
     }
 
@@ -176,7 +184,7 @@ void OrGate::draw(bool drawConnectors) {
 };
 
 bool OrGate::calcOutputState(){
-  Serial.println("calculating gate output");
+  /*Serial.println("calculating gate output");
   outputState = false;
   if (hasInputs == true) {
     if (inputs != nullptr) {
@@ -191,9 +199,40 @@ bool OrGate::calcOutputState(){
       bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
       inputs[connectorCount]->recalcOnChange = false; 
       inputs[connectorCount]->setState(outputState); 
+      inputs[connectorCount]->recalcOnChange = prevRecalcState;      
+    };
+  };
+  afterCalcOutputState();
+  Serial.println("calculated gate output:" + boolToString(outputState));
+  return outputState;*/
+
+
+  Serial.println("calculating gate output");
+  outputState = false;
+  if (hasInputs == true) {
+    if (inputs != nullptr) {
+      for (size_t i = 0; i < connectorCount; i++) {
+        if (outputState) {
+          if (isExclusive) {
+            if (inputs[i]->on) {
+              outputState = false;
+              break;
+            }
+          } else {
+            break;
+          }
+        } else {
+          outputState = inputs[i]->on;
+        }        
+      };
+      outputState = hasNot ? !outputState : outputState;
+      bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
+      inputs[connectorCount]->recalcOnChange = false; 
+      inputs[connectorCount]->setState(outputState); 
       inputs[connectorCount]->recalcOnChange = prevRecalcState;
     };
   };
+  afterCalcOutputState();
   Serial.println("calculated gate output:" + boolToString(outputState));
   return outputState;
 };

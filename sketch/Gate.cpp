@@ -17,19 +17,63 @@ GateInput::GateInput(
   gate(pGate),
   clickable(pClickable)
 {
+  Serial.println("INIT GateInput::GateInput 1");
   if (pR < DEFAULT_GATE_MIN_INPUT_RADIUS) {
     r = DEFAULT_GATE_MIN_INPUT_RADIUS;
   } else if (pR > DEFAULT_GATE_MAX_INPUT_RADIUS) {
     r = DEFAULT_GATE_MAX_INPUT_RADIUS;
   };
   initState(pOn);
+  Serial.println("END GateInput::GateInput 1");
 };
+
+GateInput::GateInput(
+  int pId,
+  Gate* pGate,
+  bool pOn,  
+  bool pClickable
+) :
+  id(pId),
+  gate(pGate),
+  on(pOn),  
+  clickable(pClickable)
+{
+  Serial.println("INIT GateInput::GateInput 2");
+  Serial.println("END GateInput::GateInput 2");
+};
+
 
 GateInput::~GateInput() {
   if (ev != nullptr) {
     delete ev;
-  }
+  }  
 }
+
+void GateInput::setValues(
+  int pId,
+  double pX,
+  double pY,
+  double pR,
+  bool pOn,
+  Gate* pGate,
+  bool pClickable
+) {
+  Serial.println("INIT GateInput::setValues "+String(pId));
+  id = pId;
+  x = pX;
+  y = pY;
+  r = pR;
+  on = pOn;
+  gate = pGate;
+  clickable = pClickable;
+  if (pR < DEFAULT_GATE_MIN_INPUT_RADIUS) {
+    r = DEFAULT_GATE_MIN_INPUT_RADIUS;
+  } else if (pR > DEFAULT_GATE_MAX_INPUT_RADIUS) {
+    r = DEFAULT_GATE_MAX_INPUT_RADIUS;
+  };
+  initState(pOn);
+  Serial.println("END GateInput::setValues");
+};
 
 void GateInput::initState(bool pInitState) {
   this->on = pInitState;
@@ -56,6 +100,10 @@ void GateInput::setState(bool newState) {
   if (redrawOnChange) draw();
   if (recalcOnChange) gate->calcOutputState();
   if (redrawOnChange && gate->visibleOutput) gate->inputs[gate->connectorCount]->draw();
+}
+
+void GateInput::setOutputGate(Gate* pGate) {
+  outputGate = pGate;
 }
 
 void GateInput::draw() {
@@ -91,7 +139,7 @@ Gate::Gate(
   width(pWidth),
   connectorMargin(pConnectorMargin)  
 {
-  Serial.println("no constructor ");
+  Serial.println("INIT Gate::Gate");
 
   /*implementar metodos seters, mas manter as propriedades publicas caso o usuario queira manipulalas manualemnte, 
   nos metodos setters, deverão ser feitas essas mesmas tratativas aqui do constructor*/
@@ -123,13 +171,20 @@ Gate::Gate(
     }
   }
   
-  Serial.println("no fim constructor");
+  if (hasInputs) {
+    initInputs();
+  }
+
+  Serial.println("END Gate::Gate");
 };
 
 //destructor;
 Gate::~Gate() {
   Serial.println("Gate::~Gate destructor");
   freeInputs();
+  if (outputsInputs != nullptr) {
+    delete outputsInputs;
+  } 
 };
 
 void Gate::updateWidthDependencies(){
@@ -145,8 +200,6 @@ void Gate::updateAspectRatioDependencies(){
   setWidth(size * aspectRatio);
 }
 
-
-
 void Gate::setWidth(double pWidth) {
   width = pWidth;
   updateWidthDependencies();
@@ -159,6 +212,15 @@ void Gate::setAspectRatio(double pAspectRatio) {
 void Gate::setSize(double pSize) {
   size = pSize;
   updateSizeDependencies();
+}
+
+void Gate::setHasInputs(bool pHasInputs, bool visible) {
+  hasInputs = pHasInputs;
+  if (hasInputs) {
+    initInputs(visible);
+  } else {
+    freeInputs();
+  }
 }
 
 
@@ -236,6 +298,19 @@ void Gate::freeInputs(){
   }
 };
 
+void Gate::initInputs(bool visible){
+  Serial.println("INIT Gate::initInputs");
+  if (hasInputs) {
+    freeInputs();
+    inputs = new GateInput*[connectorCount+1]; //+1 for output
+    for(int i = 0; i <= connectorCount; i++) {
+      inputs[i] = new GateInput(i,this);
+      inputs[i]->visible = visible;
+    }
+  }
+  Serial.println("END Gate::initInputs");
+}
+
 // Método para redimensionar o array
 void Gate::setConnectorCount(byte pConnectorCount) {
     // Libera o array antigo, se existir
@@ -243,24 +318,12 @@ void Gate::setConnectorCount(byte pConnectorCount) {
 
     // Atualiza o tamanho do array
     connectorCount = pConnectorCount;
-
-    // Realoca memória para o novo tamanho
-    //inputs = (GateInput*)malloc(sizeof(GateInput) * (connectorCount + 1)); //+1 = last = output connector
-     inputs = new GateInput*[connectorCount];
-
-    // Inicializa os novos GateInput no array
-    /*for (byte i = 0; i < connectorCount; ++i) {
-        inputs[i] = GateInput();  // Inicializa com id e estado falso
-    }*/
+    
+    initInputs();
 }
 
-
-void Gate::drawConnector(int position, double startPos, double pConnectorSize) { 
-  Serial.println("Gate::drawConnector "+String(position) + ","+String(startPos) + ","+String(pConnectorSize));
+double Gate::getConnectorMargin(int position) {
   double connMargin = connectorMargin;
-  if (pConnectorSize == -1) {
-    pConnectorSize = connectorSize;
-  }
   if (position > 0) {            
     connMargin = connMargin + (position * (width - (connMargin * 2)) / (connectorCount - 1));    
   } else if (connectorCount == 1) {
@@ -269,6 +332,15 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
   if (lineWidth > 1) {
     connMargin = connMargin - lineWidth / 2;
   }  
+  return connMargin;
+}
+
+void Gate::drawConnector(int position, double startPos, double pConnectorSize) { 
+  Serial.println("Gate::drawConnector "+String(position) + ","+String(startPos) + ","+String(pConnectorSize));
+  double connMargin = getConnectorMargin(position);
+  if (pConnectorSize == -1) {
+    pConnectorSize = connectorSize;
+  }
 
   if (vertical) {
     if (startPos == -1) {
@@ -283,12 +355,9 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
     }
     if (hasInputs == true) {
       if (inputs == nullptr) {
-        setConnectorCount(connectorCount);
+        initInputs();
       }
-      /*if (inputs[position] != nullptr) {
-        delete inputs[position];
-      }*/
-      inputs[position] = new GateInput(
+      inputs[position]->setValues(
         position,
         x + connMargin,
         startPos+pConnectorSize,
@@ -296,9 +365,7 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
         false,
         this
       );
-      Serial.println("nnnn"+String(position));
-      inputs[position]->draw();
-      //inputs[position] = input;
+      inputs[position]->draw();      
     }
 
   } else {
@@ -315,12 +382,9 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
     
     if (hasInputs == true) {
       if (inputs == nullptr) {
-        setConnectorCount(connectorCount);
+        initInputs();
       }
-      /*if (inputs[position] != nullptr) {
-        delete inputs[position];
-      }*/
-      inputs[position] = new GateInput(
+      inputs[position]->setValues(
         position,
         startPos-pConnectorSize,
         y + connMargin,
@@ -328,9 +392,7 @@ void Gate::drawConnector(int position, double startPos, double pConnectorSize) {
         false,
         this
       );
-      Serial.println("nnnn"+position);
       inputs[position]->draw();
-      //inputs[position] = input;
     }
   }
 };
@@ -342,6 +404,8 @@ void Gate::drawOutputConnector() {
     if (hasNot) {
       py2 = py2 - (notRadius * 2);
     }
+
+    //draw output connector line
     if (lineWidth > 1) {
       double pInit = x + (width / 2 ) - (lineWidth / 2);
       for (int i = 0; i < lineWidth; i++) {
@@ -352,13 +416,12 @@ void Gate::drawOutputConnector() {
     }
 
     if (hasInputs == true) {
+
+      //draw output button
       if (inputs == nullptr) {
-        setConnectorCount(connectorCount);
+        initInputs();
       }
-      /*if (inputs[connectorCount] != nullptr) {
-        delete inputs[connectorCount];
-      }*/
-      inputs[connectorCount] = new GateInput(
+      inputs[connectorCount]->setValues(
         connectorCount,
         x + (width / 2 ),
         y - size - connectorSize,
@@ -371,6 +434,44 @@ void Gate::drawOutputConnector() {
       inputs[connectorCount]->visible = visibleOutput;
       calcOutputState();
       inputs[connectorCount]->draw();
+
+      //draw connector between this output and output input gate
+      if (outputsInputs != nullptr) {
+        Node* current = outputsInputs->head;
+        GateInput* gInput = nullptr;
+        double x1 = inputs[connectorCount]->x;
+        double y1 = inputs[connectorCount]->y;
+        double x2 = 0;
+        double y2 = 0;
+        while(current != nullptr) {
+          gInput = static_cast<GateInput*>(current->data);
+          x2 = x1;
+          y2 = y1 - ((y1 - gInput->y) / 2);
+          SCtrl::tft.drawLine(
+            x1,
+            y1,
+            x2,
+            y2,
+            lineColor
+          );
+          SCtrl::tft.drawLine(
+            gInput->x,
+            gInput->y,
+            gInput->x,
+            gInput->y + ((y1 - gInput->y) / 2),
+            lineColor
+          );
+          SCtrl::tft.drawLine(
+            x1,
+            y2,
+            gInput->x,
+            gInput->y + ((y1 - gInput->y) / 2),
+            lineColor
+          );
+          current = current->next;
+        }
+      }
+
     }
   } else {
     double px1 = x + size;
@@ -378,6 +479,8 @@ void Gate::drawOutputConnector() {
     if (hasNot) {
       px1 = px1 + (notRadius * 2);
     }
+
+    //draw output connector line
     if (lineWidth > 1) {
       double pInit = y + (width / 2) - (lineWidth / 2);
       for (int i = 0; i < lineWidth; i++) {
@@ -388,13 +491,12 @@ void Gate::drawOutputConnector() {
     }
 
     if (hasInputs == true) {
+
+      //draw output input button
       if (inputs == nullptr) {
-        setConnectorCount(connectorCount);
+        initInputs();
       }
-      /*if (inputs[connectorCount] != nullptr) {
-        delete inputs[connectorCount];
-      }*/
-      inputs[connectorCount] = new GateInput(
+      inputs[connectorCount]->setValues(
         connectorCount,
         x + size + connectorSize,
         y + width / 2,
@@ -407,6 +509,43 @@ void Gate::drawOutputConnector() {
       inputs[connectorCount]->visible = visibleOutput;
       calcOutputState();
       inputs[connectorCount]->draw();
+
+      //draw connector between this output and output input gate
+      if (outputsInputs != nullptr) {
+        Node* current = outputsInputs->head;
+        GateInput* gInput = nullptr;
+        double x1 = inputs[connectorCount]->x;
+        double y1 = inputs[connectorCount]->y;
+        double x2 = 0;
+        double y2 = 0;
+        while(current != nullptr) {
+          gInput = static_cast<GateInput*>(current->data);
+          x2 = x1 + ((gInput->x - x1) / 2);
+          y2 = y1; //y1 - ((y1 - gInput->y) / 2);
+          SCtrl::tft.drawLine(
+            x1,
+            y1,
+            x2,
+            y2,
+            lineColor
+          );
+          SCtrl::tft.drawLine(
+            gInput->x,
+            gInput->y,
+            gInput->x - ((gInput->x - x1) / 2),
+            gInput->y, //+ ((y1 - gInput->y) / 2),
+            lineColor
+          );
+          SCtrl::tft.drawLine(
+            x2,
+            y2,
+            gInput->x - ((gInput->x - x1) / 2),
+            gInput->y, //+ ((y1 - gInput->y) / 2),
+            lineColor
+          );
+          current = current->next;
+        }
+      }
     }
   }
 };
@@ -428,6 +567,7 @@ void Gate::drawNot(){
 }
 
 void Gate::draw(bool drawConnectors) {
+  Serial.println("connectors " + connectorCount);
   if (drawConnectors == true) {
     for(int i = 0; i < connectorCount; i++) {
       drawConnector(i);
@@ -442,3 +582,34 @@ bool Gate::calcOutputState(){
   //to override
   return outputState;
 };
+
+void Gate::afterCalcOutputState() {
+  if (outputsInputs != nullptr) {
+    Node* current = outputsInputs->head;
+    GateInput* gInput = nullptr;
+    while(current != nullptr) {
+      gInput = static_cast<GateInput*>(current->data);
+      gInput->setState(outputState);
+      current = current->next;
+    }
+  }
+}
+
+void Gate::addOutputInput(GateInput* pGateInput) {
+  if (outputsInputs == nullptr) {
+    outputsInputs = new DoublyLinkedList();
+  }
+  pGateInput->setState(outputState);
+  outputsInputs->add(pGateInput);
+  pGateInput->setOutputGate(this);
+}
+
+void Gate::setIsVisibleInputs(bool pIsVisibleInputs){
+  isVisibleInputs = pIsVisibleInputs;
+  if (hasInputs && inputs != nullptr) {
+    for (size_t i = 0; i < connectorCount; i++) {
+      inputs[i]->visible = isVisibleInputs;
+    }
+  }
+}
+

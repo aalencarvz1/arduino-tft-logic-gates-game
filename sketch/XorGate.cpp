@@ -22,23 +22,3 @@ XorGate::XorGate(
   isExclusive = true;
 };
 
-bool XorGate::calcOutputState(){
-  Serial.println("calculating gate output");
-  outputState = false;
-  if (hasInputs == true) {
-    if (inputs != nullptr) {
-      for (size_t i = 0; i < connectorCount; i++) {
-        outputState ^= inputs[i]->on;          
-      };
-      outputState = hasNot ? !outputState : outputState;
-      bool prevRecalcState = inputs[connectorCount]->recalcOnChange;
-      inputs[connectorCount]->recalcOnChange = false; 
-      inputs[connectorCount]->setState(outputState); 
-      inputs[connectorCount]->recalcOnChange = prevRecalcState;
-    };
-  };
-  Serial.println("calculated gate output:" + boolToString(outputState));
-  return outputState;
-};
-
-
