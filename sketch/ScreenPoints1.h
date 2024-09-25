@@ -30,8 +30,18 @@ struct ScreenPoints1 : public BaseScreen{
 
   ScreenPoints1(char* pTitle = "MODO PONTUACAO", bool pHasBack = true);
   ~ScreenPoints1();
+  void freeMemory();
+  void clearLevelAndPhaseTextSpace();
+  void drawLevelAndPhaseText();
+  void clearLeftSide();
+  void clearRightSide();
+  void clearCenterSpace();
+  void clearTopTextSpace();
+  void clearGateSpace(Gate* pGate, bool pDelete = true);
   void drawGate(char* gateName, double x, double y, double size, int pConnectorCount = DEFAULT_GATE_CONNECTOR_COUNT, double pGateWidth = DEFAULT_GATE_WIDTH);
   void drawNextPhase();
+  void drawGateLevel();
+  void drawCircuitLevel();
   void drawConfirmButton();
   void pontuationTitle();
   void drawCurrentPontuation();

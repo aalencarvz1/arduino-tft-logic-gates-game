@@ -27,6 +27,7 @@ void Screens::goTo(byte screenId,char* params[]) {
   BaseScreen* newScreen = nullptr;
 
   //find screen by id
+  FREERAM_PRINT;
   if (screenId == ScreenInitialMenu::SCREEN_ID) {
     newScreen = new ScreenInitialMenu("PORTAS LOGICAS",false);
   } else if (screenId == ScreenLearning::SCREEN_ID) {
@@ -44,6 +45,7 @@ void Screens::goTo(byte screenId,char* params[]) {
   } else if (screenId == ScreenPoints1::SCREEN_ID) {
     newScreen = new ScreenPoints1();
   };
+  FREERAM_PRINT;
 
   if (newScreen != nullptr) {    
 
@@ -69,6 +71,7 @@ void Screens::goTo(byte screenId,char* params[]) {
   } else {
     Serial.println("screen not found: " + String(screenId));
   }
+  FREERAM_PRINT;
 };
 
 //navigate to previous screen on stack

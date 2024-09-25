@@ -3,6 +3,7 @@
 
 #include "Utils.h"
 #include "BaseScreen.h"
+#include "DoubleLinkedList.h"
 
 
 
@@ -25,7 +26,8 @@ class LambdaCallback : public ICallback {
 
 
 class EVRcpt;//forward declaration
-extern EVRcpt* lastEVRcpt;
+//extern EVRcpt* lastEVRcpt;
+extern DoubleLinkedList<EVRcpt>* event_receipts;// = new DoubleLinkedList<EVRcpt>();
 
 //para instanciar elementos desenhados em tela que precisam receber eventos de toque (clique)
 struct EVRcpt {

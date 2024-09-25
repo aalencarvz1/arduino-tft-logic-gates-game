@@ -119,7 +119,9 @@ static void SCtrl::drawRoundButton(double x,double y,double r,int color,char* te
     SCtrl::drawCenteredText(text,y+r+textDistance,x);
   }
   if (onClick != nullptr) {
+    FREERAM_PRINT;
     new EVRcpt(x, y, r, onClick);
+    FREERAM_PRINT;
   }
 };
 

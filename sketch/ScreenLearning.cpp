@@ -23,6 +23,7 @@ void drawGateButton(
   char* gateName
 ){
   SCtrl::drawRoundButton(x + (col * (x*2.0)),y + hSupSpace + (lin * (y * 2.0)),r,color,gateName,false,true,10.0);
+  FREERAM_PRINT;
   EVRcpt* ev = new EVRcpt(x + (col * (x*2.0)),y + hSupSpace + (lin * (y * 2.0)),r);
   auto f = [gateName](){
     char* params[] = {gateName, nullptr};
@@ -36,6 +37,7 @@ void drawGateButton(
     delete g;
     g = nullptr;
   }
+  FREERAM_PRINT;
 }
 
 

@@ -20,6 +20,7 @@ void BaseScreen::drawBackButton(){
   SCtrl::tft.setTextSize(2);
   SCtrl::tft.setTextColor(DEFAULT_TEXT_COLOR);
   SCtrl::tft.print("<");
+  FREERAM_PRINT;
   EVRcpt* ev = new EVRcpt(px+w/2,py+h/2,w);
   ev->staticOnClick = [](){
     Screens::goBack();    

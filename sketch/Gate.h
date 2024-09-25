@@ -3,7 +3,7 @@
 
 #include "SCtrl.h"
 #include "EVRcpt.h"
-#include "DoublyLinkedList.h"
+#include "DoubleLinkedList.h"
 
 #define DEFAULT_GATE_SIZE 150.0
 #define DEFAULT_GATE_CONNECTOR_COUNT 2
@@ -107,7 +107,7 @@ struct Gate {
   bool isVisibleInputs = true;
   bool visibleOutput = true;
   GateInput** inputs = nullptr;
-  DoublyLinkedList* outputsInputs = nullptr;
+  DoubleLinkedList<GateInput>* outputsInputs = nullptr;
   int currentCircuitLevel = 0;
 
 

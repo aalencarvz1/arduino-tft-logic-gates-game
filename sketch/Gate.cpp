@@ -44,9 +44,13 @@ GateInput::GateInput(
 
 
 GateInput::~GateInput() {
+  Serial.println("INIT GateInput::~GateInput");
   if (ev != nullptr) {
-    delete ev;
+    //delete ev;    
+    event_receipts->remove(ev);
+    ev = nullptr;
   }  
+  Serial.println("END GateInput::~GateInput");
 }
 
 void GateInput::setValues(
@@ -79,9 +83,11 @@ void GateInput::initState(bool pInitState) {
   this->on = pInitState;
   if (clickable) {
     if (ev != nullptr) {
-      delete ev;
+      //delete ev;
+      event_receipts->remove(ev);
       ev = nullptr;
     }
+    FREERAM_PRINT;
     ev = new EVRcpt(x,y,r);
     auto f = [&](){
       this->setState(!this->on);
@@ -180,11 +186,12 @@ Gate::Gate(
 
 //destructor;
 Gate::~Gate() {
-  Serial.println("Gate::~Gate destructor");
+  Serial.println("INIT Gate::~Gate");
   freeInputs();
   if (outputsInputs != nullptr) {
     delete outputsInputs;
   } 
+  Serial.println("END Gate::~Gate");
 };
 
 void Gate::updateWidthDependencies(){
@@ -302,6 +309,7 @@ void Gate::initInputs(bool visible){
   Serial.println("INIT Gate::initInputs");
   if (hasInputs) {
     freeInputs();
+    FREERAM_PRINT;
     inputs = new GateInput*[connectorCount+1]; //+1 for output
     for(int i = 0; i <= connectorCount; i++) {
       inputs[i] = new GateInput(i,this);
@@ -437,7 +445,7 @@ void Gate::drawOutputConnector() {
 
       //draw connector between this output and output input gate
       if (outputsInputs != nullptr) {
-        Node* current = outputsInputs->head;
+        Node<GateInput>* current = outputsInputs->head;
         GateInput* gInput = nullptr;
         double x1 = inputs[connectorCount]->x;
         double y1 = inputs[connectorCount]->y;
@@ -512,7 +520,7 @@ void Gate::drawOutputConnector() {
 
       //draw connector between this output and output input gate
       if (outputsInputs != nullptr) {
-        Node* current = outputsInputs->head;
+        Node<GateInput>* current = outputsInputs->head;
         GateInput* gInput = nullptr;
         double x1 = inputs[connectorCount]->x;
         double y1 = inputs[connectorCount]->y;
@@ -567,7 +575,7 @@ void Gate::drawNot(){
 }
 
 void Gate::draw(bool drawConnectors) {
-  Serial.println("connectors " + connectorCount);
+  Serial.println("INIT Gate::draw");
   if (drawConnectors == true) {
     for(int i = 0; i < connectorCount; i++) {
       drawConnector(i);
@@ -576,6 +584,7 @@ void Gate::draw(bool drawConnectors) {
   }
   drawBody(drawConnectors);
   drawNot();
+  Serial.println("END Gate::draw");
 };
 
 bool Gate::calcOutputState(){
@@ -585,7 +594,7 @@ bool Gate::calcOutputState(){
 
 void Gate::afterCalcOutputState() {
   if (outputsInputs != nullptr) {
-    Node* current = outputsInputs->head;
+    Node<GateInput>* current = outputsInputs->head;
     GateInput* gInput = nullptr;
     while(current != nullptr) {
       gInput = static_cast<GateInput*>(current->data);
@@ -596,12 +605,14 @@ void Gate::afterCalcOutputState() {
 }
 
 void Gate::addOutputInput(GateInput* pGateInput) {
+  Serial.println("INIT Gate::addOutputInput");
   if (outputsInputs == nullptr) {
-    outputsInputs = new DoublyLinkedList();
+    outputsInputs = new DoubleLinkedList<GateInput>();
   }
   pGateInput->setState(outputState);
   outputsInputs->add(pGateInput);
   pGateInput->setOutputGate(this);
+  Serial.println("END Gate::addOutputInput");
 }
 
 void Gate::setIsVisibleInputs(bool pIsVisibleInputs){

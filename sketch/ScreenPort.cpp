@@ -42,6 +42,7 @@ void drawRandomGate(Gate* g){
     double baseSizePerc = double(random(0,90))/100.0;
     double connectorSize = double(random(5,90));
     SCtrl::tft.fillRect(0,0,480,320,TFT_BLACK);
+    FREERAM_PRINT;
     if (g != nullptr && randomGate != true) {
       g->setValues(
         xPos,
@@ -112,6 +113,7 @@ ScreenPort::ScreenPort(char* pTitle, bool pHasBack) :
 
 void ScreenPort::draw(char* params[]){
   BaseScreen::draw(params);
+  FREERAM_PRINT;
   if (params != nullptr) {
     Gate* g = nullptr;
     if (params[0] == "AND") {
@@ -127,4 +129,5 @@ void ScreenPort::draw(char* params[]){
   } else {
     drawRandomGate(nullptr);
   }
+  FREERAM_PRINT;
 };

@@ -1,23 +1,35 @@
 #include "GatesCircuit.h"
 #include "Gates.h"
 
-
-
 GatesCircuit::GatesCircuit(
   double pContainerX,
   double pContainerY,
   double pContainerWidth,
-  double pContainerHeight)
-  : containerX(pContainerX),
-    containerY(pContainerY),
-    containerWidth(pContainerWidth),
-    containerHeight(pContainerHeight) {
-  gates = new DoublyLinkedList();
+  double pContainerHeight,
+  int pGateLevelCount,
+  char* gatesNames[],
+  bool pIntermediaryOutputsVisible
+) : 
+  containerX(pContainerX),
+  containerY(pContainerY),
+  containerWidth(pContainerWidth),
+  containerHeight(pContainerHeight),
+  gateLevelCount(pGateLevelCount),
+  intermediaryOutputsVisible(pIntermediaryOutputsVisible)
+{
+  FREERAM_PRINT;
+  gates = new DoubleLinkedList<Gate>();
+  createGates(gatesNames);
+  FREERAM_PRINT;
 };
 
 GatesCircuit::~GatesCircuit() {
-  delete gates;
-  delete topGate;
+  Serial.println("INIT GatesCircuit::~GatesCircuit");
+  if (gates != nullptr) {
+    delete gates;
+    gates = nullptr;
+  }
+  Serial.println("END GatesCircuit::~GatesCircuit");
 };
 
 Gate* GatesCircuit::createGate(
@@ -34,8 +46,9 @@ Gate* GatesCircuit::createGate(
   double pBaseSizePerc,
   double pConnectorSize,
   double pWidth,
-  double pConnectorMargin) {
-
+  double pConnectorMargin
+) {
+  Serial.println("INIT GatesCircuit::createGate");
   int currentCircuitLevel = 0;
   //adjust creation gate values
   if (gateName == nullptr) {
@@ -45,7 +58,7 @@ Gate* GatesCircuit::createGate(
 
   if (outputInput == nullptr) {
     //find next input without outputGate
-    Node* current = gates->head;
+    Node<Gate>* current = gates->head;
     while (current != nullptr) {
       outputGate = current->data;
       Serial.println("passing port in " + String(outputGate->x) + " " + String(outputGate->y));
@@ -127,6 +140,7 @@ Gate* GatesCircuit::createGate(
       }
     }
   }
+  Serial.println("okx1");
   lastCreatedGate = Gates::createGateByName(
     gateName,
     pX,
@@ -140,43 +154,64 @@ Gate* GatesCircuit::createGate(
     pBaseSizePerc,
     pConnectorSize,
     pWidth,
-    pConnectorMargin);
+    pConnectorMargin
+  );
+  Serial.println("okx2");
   if (vertical) {
     lastCreatedGate->y = lastCreatedGate->y + lastCreatedGate->connectorSize * 2;  //adjust top position, if vertical
   } else {
     //do implement
   }
+  Serial.println("okx3");
   lastCreatedGate->setHasInputs(hasInputs,intermediaryInputsVisible);
   lastCreatedGate->visibleOutput = intermediaryOutputsVisible;
   lastCreatedGate->currentCircuitLevel = currentCircuitLevel;
+  Serial.println("okx4");
   if (topGate == nullptr) {
     topGate = lastCreatedGate;                
     lastCreatedGate->visibleOutput = topOutputVisible;        
   } else {
     lastCreatedGate->visibleOutput = intermediaryOutputsVisible;
   };
+  Serial.println("okx5");
   if (lastCreatedGate->currentCircuitLevel == gateLevelCount-1) {
     lastCreatedGate->setIsVisibleInputs(true);
   } else {
     lastCreatedGate->setIsVisibleInputs(intermediaryInputsVisible);
   }
+  Serial.println("okx6");
   if (outputInput != nullptr) {
     lastCreatedGate->addOutputInput(outputInput);
   };
+  Serial.println("okx8");
   gates->add(lastCreatedGate);
+  Serial.println("okx9");
+  Serial.println("END GatesCircuit::createGate");
   return lastCreatedGate;
 };
 
-void GatesCircuit::draw() {
-  if (gates != nullptr) {
-    Node* current = gates->head;
-    Gate* gate = nullptr;
-    while (current != nullptr) {
-      gate = current->data;
-      gate->draw();
-      current = current->next;
+void GatesCircuit::createGates(char* pGatesNames[]) {
+  Serial.println("INIT GatesCircuit::createGates");
+  if (pGatesNames != nullptr) {
+    Gate* g = nullptr;
+    for(int i = 0; pGatesNames[i] != nullptr; i++) {
+      g = createGate(pGatesNames[i]);
+      Serial.println("a1");
+      g->draw();
+      Serial.println("a2");
     }
   }
+  Serial.println("END GatesCircuit::createGates");
+} 
+
+void GatesCircuit::draw() {
+  Node<Gate>* current = gates->head;
+  Gate* gate = nullptr;
+  while (current != nullptr) {
+    gate = current->data;
+    gate->draw();
+    current = current->next;
+  }  
 }
 
 void GatesCircuit::setVertical(bool pNewVertical){

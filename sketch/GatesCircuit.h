@@ -2,7 +2,7 @@
 #define GATESCIRCUIT_H
 
 #include "Gate.h"
-#include "DoublyLinkedList.h"
+#include "DoubleLinkedList.h"
 #include "SCtrl.h"
 
 #define DEFAULT_CIRCUIT_HAS_INPUTS true
@@ -40,14 +40,17 @@ class GatesCircuit{
     bool topOutputVisible = DEFAULT_CIRCUIT_TOP_OUTPUT_IS_VISIBLE;
     Gate* topGate = nullptr;
     Gate* lastCreatedGate = nullptr;
-    DoublyLinkedList* gates = nullptr;
+    DoubleLinkedList<Gate>* gates;
 
 
     GatesCircuit(
       double pContainerX = DEFAULT_WINDOW_MARGIN,
       double pContainerY = 50+DEFAULT_WINDOW_MARGIN+5,
       double pContainerWidth = SCtrl::tft.width() - DEFAULT_WINDOW_MARGIN * 2,
-      double pContainerHeight = SCtrl::tft.height() - (50+DEFAULT_WINDOW_MARGIN*2)
+      double pContainerHeight = SCtrl::tft.height() - (50+DEFAULT_WINDOW_MARGIN*2),
+      int pGateLevelCount = DEFAULT_CIRCUIT_GATE_LEVEL_COUNT,
+      char* gatesNames[] = nullptr,
+      bool pIntermediaryOutputsVisible = DEFAULT_CIRCUIT_INTERMEDIARY_OUTPUTS_IS_VISIBLE
     );
     ~GatesCircuit();
 
@@ -68,6 +71,7 @@ class GatesCircuit{
       double pWidth            = DEFAULT_GATE_WIDTH,
       double pConnectorMargin  = DEFAULT_GATE_CONNECTOR_MARGIN
     );
+    void createGates(char* pGatesNames[]);
     void draw();
     void setVertical(bool pNewVertical);
 };

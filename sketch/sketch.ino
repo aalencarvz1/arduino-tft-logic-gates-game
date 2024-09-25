@@ -1,3 +1,4 @@
+#include <MemoryUsage.h>  // Inclui a biblioteca MemoryUsage
 #include "SCtrl.h"
 #include "EVRcpt.h"
 #include "XnorGate.h"
@@ -14,10 +15,10 @@ void setup() {
   Serial.begin(9600);
   SCtrl::init(); 
   SCtrl::tft.fillScreen(TFT_BLACK);
-  //Screens::goTo(ScreenInitialMenu::SCREEN_ID);
+  Screens::goTo(ScreenInitialMenu::SCREEN_ID);
   //Screens::goTo(ScreenLearning::SCREEN_ID);
   //Screens::goTo(ScreenPort::SCREEN_ID);
-  Screens::goTo(ScreenPoints1::SCREEN_ID);
+  //Screens::goTo(ScreenPoints1::SCREEN_ID);
   /*XnorGate* g = new XnorGate(
     100.0, 
     50.0,
@@ -39,6 +40,9 @@ void setup() {
 
 void loop() {
   //get clicked point (if cliqued, z > 0, z = pressure)
+
+
+
   TSPoint p = SCtrl::ts.getPoint();
 
   //stackoverflow credits: restore status of shared pins to avoid not responding tft call functions
@@ -57,12 +61,17 @@ void loop() {
     Serial.println("clicked on " + String(p.x) + "," + String(p.y) + " > " +String(uiP.x) + "," + String(uiP.y) + " " + String(inClick));
 
     //loop troght event receptors array, checking if is point in area of element
-    EVRcpt* evTemp = lastEVRcpt;
-    while(evTemp != nullptr) {
-      if (evTemp->checkClickEvent(uiP) == true) {
-        break;//not bubble event
+    //EVRcpt* evTemp = lastEVRcpt;
+    Node<EVRcpt>* current = event_receipts->tail;  // Começa pelo último nó (tail)
+    
+    while (current != nullptr) {
+    //while(evTemp != nullptr) {
+      if (current->data != nullptr) {
+        if (current->data->checkClickEvent(uiP) == true) {
+          break;//not bubble event
+        }
       }
-      evTemp = evTemp->prev;
+      current = current->prev;
     }
     inClick = false;
   }  

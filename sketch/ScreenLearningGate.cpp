@@ -74,6 +74,7 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
       SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,35,4,DEFAULT_BACKGROUND_COLOR,DEFAULT_BACKGROUND_COLOR,-1);  
     }
     if (evNext == nullptr) {
+      FREERAM_PRINT;
       evNext = new EVRcpt(containerX+containerWidth-50,containerY + containerHeight /2,30);    
       auto f = [this,x,y,size](){
         this->drawNextGate(x,y,size);
@@ -94,6 +95,7 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
       }
       SCtrl::drawRoundedPlay(containerX+containerWidth-50,containerY + containerHeight /2,35,4,DEFAULT_BACKGROUND_COLOR,DEFAULT_BACKGROUND_COLOR);
     }
+    FREERAM_PRINT;
     if (evPrev == nullptr) {
       evPrev = new EVRcpt(containerX+50,containerY + containerHeight /2,30);    
       auto f = [this,x,y,size](){
@@ -104,7 +106,8 @@ void ScreenLearningGate::drawGate(char* gateName, double x, double y, double siz
     } else if (!evPrev->enabled){
       evPrev->enabled = true;
       SCtrl::drawRoundedPlay(containerX+50,containerY + containerHeight /2,30,4,DEFAULT_BACKGROUND_COLOR,TFT_YELLOW,-1);  
-    }       
+    }  
+    FREERAM_PRINT;     
   } 
 }
 

@@ -8,6 +8,8 @@
 #include "NorGate.h"
 #include "XorGate.h"
 #include "XnorGate.h"
+#include "BypassGate.h"
+
 
 
 static char* Gates::gateNames[] = {"AND", "OR", "NOT", "NAND", "NOR", "XOR", "XNOR"};
@@ -63,6 +65,7 @@ static Gate* Gates::createGateByName(
 ) {
   Gate* result = nullptr;
   toUpperCase(gateName);
+  FREERAM_PRINT;
   if (gateName == "AND") {
     result = new AndGate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin);
   } else if (gateName == "OR") {
@@ -77,6 +80,8 @@ static Gate* Gates::createGateByName(
     result = new XorGate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin);
   } else if (gateName == "XNOR") {
     result = new XnorGate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin);
+  } else if (gateName == "BYPASS") {
+    result = new BypassGate(pX,pY,pSize,pConnectorCount,pVertical,pLineColor,pLineWidth,pAspectRatio,pBaseSizePerc,pConnectorSize,pWidth,pConnectorMargin);
   }
   return result;
 }
